@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f5ef;
+  --foreground: #191612;
+  --surface: #ffffff;
+  --surface-soft: #efe7dc;
+  --accent: #6f8f72;
+  --accent-dark: #476146;
+  --gold: #d8b46a;
+}
+
+body {
+  background: radial-gradient(circle at top, #fffaf0 0%, var(--background) 45%, #eee4d6 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
