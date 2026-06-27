@@ -6,3 +6,11 @@ export type Companion = {
   temperament: CompanionTemperament;
   createdAt: string;
 };
+
+export type CompanionMemory = {
+  id: string;
+  companionId: string;
+  content: string;
+  questId: string;
+  createdAt: string;
+};
