@@ -5,7 +5,7 @@ import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { useCompanion } from "@/components/providers/CompanionProvider";
 
 export default function Home() {
-  const { companion, isQuestCompleted, isLoading, resetCompanion } = useCompanion();
+  const { companion, isQuestCompleted, isLoading, memories, resetCompanion } = useCompanion();
 
   if (isLoading) {
     return (
@@ -19,6 +19,24 @@ export default function Home() {
   }
 
   const hasCompanion = companion !== null;
+
+  // Retrieve and parse quest memory if completed
+  const questMemory = memories.find((m) => m.questId === "notice_one_thing");
+  let parsedMemory = null;
+  if (isQuestCompleted && questMemory) {
+    try {
+      parsedMemory = JSON.parse(questMemory.content);
+    } catch (e) {
+      parsedMemory = {
+        userObservation: "Studied an object closely.",
+        routedSpecialist: "Generalist",
+        specialistFeedback: "Everyday objects carry hidden complexities.",
+        evaluationRating: "Developing",
+        evaluationFeedback: "",
+        companionReflection: questMemory.content,
+      };
+    }
+  }
 
   return (
     <main className="min-h-screen px-6 py-8">
@@ -41,10 +59,33 @@ export default function Home() {
           <p className="mt-4 text-base leading-7 text-black/65">
             {hasCompanion
               ? isQuestCompleted
-                ? `You completed the first quest. ${companion.name} feels a sense of quiet accomplishment. Ready for the next adventure?`
+                ? `You completed your first check-in. ${companion.name} is quiet, reflecting on how you grow together.`
                 : `${companion.name} is a ${companion.temperament} companion, ready to guide you. Begin the first quest by studying one thing closely.`
               : "Create a companion that remembers how you grow, then begin a small quest built around curiosity, practice, and reflection."}
           </p>
+
+          {/* Show the reflection summary if quest is completed */}
+          {hasCompanion && isQuestCompleted && parsedMemory && (
+            <div className="mt-6 rounded-2xl border border-black/5 bg-white/50 p-4 text-left shadow-3xs space-y-2.5 animate-orb-float">
+              <div className="flex items-center justify-between">
+                <span className="text-xxs font-bold uppercase tracking-wider text-[var(--accent)]">
+                  Notice One Thing Memory
+                </span>
+                <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-100/50 px-2 py-0.5 rounded-full">
+                  {parsedMemory.routedSpecialist} Specialist
+                </span>
+              </div>
+              <p className="text-xs italic text-black/65 font-medium leading-5">
+                “{parsedMemory.userObservation}”
+              </p>
+              <div className="pt-2 border-t border-black/5">
+                <p className="text-xxs font-bold text-black/40 uppercase">Companion's Reflection</p>
+                <p className="mt-1 text-xs text-black/75 leading-5">
+                  {parsedMemory.companionReflection}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 grid gap-3">

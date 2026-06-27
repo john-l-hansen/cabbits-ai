@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Companion, CompanionTemperament, CompanionMemory } from "@/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { runAgentSimulation } from "@/lib/agents/simulation";
 
 type CompanionContextType = {
   companion: Companion | null;
@@ -11,7 +12,7 @@ type CompanionContextType = {
   isUsingSupabase: boolean;
   memories: CompanionMemory[];
   createCompanion: (name: string, temperament: CompanionTemperament) => Promise<void>;
-  completeQuest: () => Promise<void>;
+  completeQuest: (userObservation: string) => Promise<void>;
   resetCompanion: () => Promise<void>;
 };
 
@@ -162,20 +163,38 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const completeQuest = async () => {
+  const completeQuest = async (userObservation: string) => {
     if (!companion) return;
 
-    setIsQuestCompleted(true);
+    // Run the agent simulation pipeline
+    const payload = runAgentSimulation(
+      userObservation,
+      companion.name,
+      companion.temperament
+    );
+
+    setIsQuestCompleted(payload.isSafe);
+
+    if (!payload.isSafe) {
+      throw new Error("Content safety violation");
+    }
 
     const memoryId = generateUUID();
     const createdAt = new Date().toISOString();
-    const content = `Notice one thing: Studied an object closely. ${companion.name} reflected that curiosity starts tiny.`;
+    const contentJson = JSON.stringify({
+      userObservation: userObservation.trim(),
+      routedSpecialist: payload.routedSpecialist,
+      specialistFeedback: payload.specialistFeedback,
+      evaluationRating: payload.evaluationRating,
+      evaluationFeedback: payload.evaluationFeedback,
+      companionReflection: payload.companionReflection,
+    });
     const questId = "notice_one_thing";
 
     const newMemory: CompanionMemory = {
       id: memoryId,
       companionId: companion.id,
-      content,
+      content: contentJson,
       questId,
       createdAt,
     };
@@ -197,7 +216,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         const { error } = await supabase.from("companion_memories").insert({
           id: memoryId,
           companion_id: companion.id,
-          content,
+          content: contentJson,
           quest_id: questId,
           created_at: createdAt,
         });
