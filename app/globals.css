@@ -19,3 +19,33 @@ body {
 * {
   box-sizing: border-box;
 }
+
+@keyframes orb-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 20px 80px rgba(71,97,70,0.18);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 25px 90px rgba(71,97,70,0.28);
+  }
+}
+
+@keyframes orb-inner-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.4;
+  }
+}
+
+.animate-orb-pulse {
+  animation: orb-pulse 6s ease-in-out infinite;
+}
+
+.animate-orb-inner-pulse {
+  animation: orb-inner-pulse 4s ease-in-out infinite;
+}
