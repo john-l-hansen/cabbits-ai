@@ -1,11 +1,17 @@
 export type CompanionTemperament = "gentle" | "curious" | "playful" | "focused";
 
+export type CompanionMood = "idle" | "hungry" | "sleeping" | "happy";
+export type CompanionLocation = "rug" | "bed" | "table";
+
 export type Companion = {
   id: string;
   name: string;
   temperament: CompanionTemperament;
   curiosity: number;
   insightsCount: number;
+  carrotCoins: number;
+  cabbitMood: CompanionMood;
+  cabbitLocation: CompanionLocation;
   createdAt: string;
 };
 

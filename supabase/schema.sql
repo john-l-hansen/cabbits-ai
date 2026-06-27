@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS public.companions (
     temperament TEXT NOT NULL,
     curiosity INTEGER DEFAULT 0 NOT NULL,
     insights_count INTEGER DEFAULT 0 NOT NULL,
+    carrot_coins INTEGER DEFAULT 128 NOT NULL,
+    cabbit_mood TEXT DEFAULT 'idle' NOT NULL,
+    cabbit_location TEXT DEFAULT 'rug' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

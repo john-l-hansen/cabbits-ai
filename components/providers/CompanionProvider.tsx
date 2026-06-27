@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Companion, CompanionTemperament, CompanionMemory, Book } from "@/types";
+import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation } from "@/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { runAgentSimulation } from "@/lib/agents/simulation";
 
@@ -17,6 +17,9 @@ type CompanionContextType = {
   resetCompanion: () => Promise<void>;
   toggleFavoriteBook: (bookId: string) => Promise<void>;
   updateBookProgress: (bookId: string, progress: number) => Promise<void>;
+  feedCabbit: () => Promise<void>;
+  toggleSleep: () => Promise<void>;
+  addCoins: (amount: number) => Promise<void>;
 };
 
 const CompanionContext = createContext<CompanionContextType | undefined>(undefined);
@@ -141,6 +144,9 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 temperament: dbComp.temperament as CompanionTemperament,
                 curiosity: dbComp.curiosity ?? 0,
                 insightsCount: dbComp.insights_count ?? 0,
+                carrotCoins: dbComp.carrot_coins ?? 128,
+                cabbitMood: (dbComp.cabbit_mood as CompanionMood) ?? "idle",
+                cabbitLocation: (dbComp.cabbit_location as CompanionLocation) ?? "rug",
                 createdAt: dbComp.created_at,
               });
 
@@ -256,6 +262,9 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       temperament,
       curiosity: 0,
       insightsCount: 0,
+      carrotCoins: 128,
+      cabbitMood: "idle",
+      cabbitLocation: "rug",
       createdAt,
     };
 
@@ -286,6 +295,9 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           temperament: newCompanion.temperament,
           curiosity: 0,
           insights_count: 0,
+          carrot_coins: 128,
+          cabbit_mood: "idle",
+          cabbit_location: "rug",
           created_at: newCompanion.createdAt,
         });
 
@@ -327,10 +339,14 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       newInsightsCount += 1;
     }
 
+    // Quest completions award carrot coins! (+30 coins)
+    const coinReward = 30;
     const updatedCompanion: Companion = {
       ...companion,
       curiosity: newCuriosity,
       insightsCount: newInsightsCount,
+      carrotCoins: companion.carrotCoins + coinReward,
+      cabbitMood: "happy",
     };
 
     setCompanion(updatedCompanion);
@@ -371,12 +387,14 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     // Persist to Supabase if configured
     if (isSupabaseConfigured && supabase) {
       try {
-        // Update companion's curiosity and insightsCount
+        // Update companion's fields
         await supabase
           .from("companions")
           .update({
             curiosity: newCuriosity,
             insights_count: newInsightsCount,
+            carrot_coins: companion.carrotCoins + coinReward,
+            cabbit_mood: "happy",
           })
           .eq("id", companion.id);
 
@@ -448,9 +466,10 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
 
     // Fill curiosity when finishing a chapter / advancing progress!
     let curiosityReward = 0;
+    let coinReward = 0;
     if (newProgress > prevProgress) {
-      // Award 20 curiosity points for finishing progress intervals
       curiosityReward = 20;
+      coinReward = 15; // Completing book sections awards +15 carrot coins!
     }
 
     let newCuriosity = companion.curiosity + curiosityReward;
@@ -465,6 +484,8 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       ...companion,
       curiosity: newCuriosity,
       insightsCount: newInsightsCount,
+      carrotCoins: companion.carrotCoins + coinReward,
+      cabbitMood: "happy",
     };
 
     const updatedBooks = books.map((b) => {
@@ -494,6 +515,8 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           .update({
             curiosity: newCuriosity,
             insights_count: newInsightsCount,
+            carrot_coins: companion.carrotCoins + coinReward,
+            cabbit_mood: "happy",
           })
           .eq("id", companion.id);
 
@@ -508,6 +531,128 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         console.log("Cabbits: Upserted book progress in Supabase.");
       } catch (e) {
         console.error("Database upsert failed for book progress:", e);
+      }
+    }
+  };
+
+  const feedCabbit = async () => {
+    if (!companion) return;
+    if (companion.carrotCoins < 5) return; // Need at least 5 coins
+
+    const newCoins = companion.carrotCoins - 5;
+    let newCuriosity = companion.curiosity + 5;
+    let newInsightsCount = companion.insightsCount;
+
+    if (newCuriosity >= 100) {
+      newCuriosity = 0;
+      newInsightsCount += 1;
+    }
+
+    const updatedCompanion: Companion = {
+      ...companion,
+      carrotCoins: newCoins,
+      curiosity: newCuriosity,
+      insightsCount: newInsightsCount,
+      cabbitMood: "happy",
+      cabbitLocation: "rug",
+    };
+
+    setCompanion(updatedCompanion);
+
+    // Local Storage Cache
+    try {
+      localStorage.setItem(COMPANION_STORAGE_KEY, JSON.stringify(updatedCompanion));
+    } catch (e) {
+      console.error("Local save failed for feed:", e);
+    }
+
+    // Persist to Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from("companions")
+          .update({
+            carrot_coins: newCoins,
+            curiosity: newCuriosity,
+            insights_count: newInsightsCount,
+            cabbit_mood: "happy",
+            cabbit_location: "rug",
+          })
+          .eq("id", companion.id);
+        console.log("Cabbits: Saved fed status in Supabase.");
+      } catch (e) {
+        console.error("Database update failed for feed:", e);
+      }
+    }
+  };
+
+  const toggleSleep = async () => {
+    if (!companion) return;
+
+    const currentlySleeping = companion.cabbitMood === "sleeping";
+    const nextMood = currentlySleeping ? "idle" : "sleeping";
+    const nextLocation = currentlySleeping ? "rug" : "bed";
+
+    const updatedCompanion: Companion = {
+      ...companion,
+      cabbitMood: nextMood,
+      cabbitLocation: nextLocation,
+    };
+
+    setCompanion(updatedCompanion);
+
+    // Local Storage Cache
+    try {
+      localStorage.setItem(COMPANION_STORAGE_KEY, JSON.stringify(updatedCompanion));
+    } catch (e) {
+      console.error("Local save failed for sleep toggle:", e);
+    }
+
+    // Persist to Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from("companions")
+          .update({
+            cabbit_mood: nextMood,
+            cabbit_location: nextLocation,
+          })
+          .eq("id", companion.id);
+        console.log("Cabbits: Saved sleep toggle in Supabase.");
+      } catch (e) {
+        console.error("Database update failed for sleep toggle:", e);
+      }
+    }
+  };
+
+  const addCoins = async (amount: number) => {
+    if (!companion) return;
+
+    const updatedCompanion: Companion = {
+      ...companion,
+      carrotCoins: companion.carrotCoins + amount,
+    };
+
+    setCompanion(updatedCompanion);
+
+    // Local Storage Cache
+    try {
+      localStorage.setItem(COMPANION_STORAGE_KEY, JSON.stringify(updatedCompanion));
+    } catch (e) {
+      console.error("Local save failed for coins add:", e);
+    }
+
+    // Persist to Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from("companions")
+          .update({
+            carrot_coins: companion.carrotCoins + amount,
+          })
+          .eq("id", companion.id);
+      } catch (e) {
+        console.error("Database update failed for coins add:", e);
       }
     }
   };
@@ -547,6 +692,9 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         resetCompanion,
         toggleFavoriteBook,
         updateBookProgress,
+        feedCabbit,
+        toggleSleep,
+        addCoins,
       }}
     >
       {children}
