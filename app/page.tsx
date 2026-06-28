@@ -316,13 +316,7 @@ export default function Home() {
               <img
                 src="/assets/cabbit_sprite.png"
                 alt={companion.name}
-                className={`h-28 w-28 object-contain mix-blend-multiply ${
-                  companion.cabbitMood === "sleeping"
-                    ? "animate-cabbit-breathe-slow"
-                    : companion.cabbitMood === "happy"
-                    ? "animate-cabbit-breathe-fast"
-                    : "animate-cabbit-breathe"
-                }`}
+                className="h-28 w-28 object-contain mix-blend-multiply"
               />
             </div>
           </div>
