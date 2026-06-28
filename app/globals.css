@@ -49,3 +49,33 @@ body {
 .animate-orb-inner-pulse {
   animation: orb-inner-pulse 4s ease-in-out infinite;
 }
+
+@keyframes cabbit-breathe {
+  0%, 100% {
+    transform: scale(1, 1);
+  }
+  35% {
+    transform: scale(1.015, 1.035);
+  }
+  50% {
+    transform: scale(1.025, 1.05);
+  }
+  65% {
+    transform: scale(1.01, 1.02);
+  }
+}
+
+.animate-cabbit-breathe {
+  animation: cabbit-breathe 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-cabbit-breathe-slow {
+  animation: cabbit-breathe 6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-cabbit-breathe-fast {
+  animation: cabbit-breathe 2.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
