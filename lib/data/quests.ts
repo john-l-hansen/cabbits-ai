@@ -7,6 +7,7 @@ export interface Quest {
   rewardItemId?: string; // Links to items in items.ts
   isLocked: boolean;
   unlockCondition: string;
+  locationId?: string;
 }
 
 export const QUESTS: Record<string, Quest> = {

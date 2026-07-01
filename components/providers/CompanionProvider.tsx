@@ -9,6 +9,84 @@ import { QUESTS, Quest } from "@/lib/data/quests";
 import { ITEMS } from "@/lib/data/items";
 import { LOCATIONS, Location } from "@/lib/data/locations";
 
+// Helper function to inject reactive quests based on companion interests
+const injectReactiveQuests = (
+  interests: Record<string, number> | undefined,
+  questsMap: Record<string, Quest>,
+  locsMap: Record<string, Location>
+) => {
+  const newQuests = { ...questsMap };
+  const newLocations = { ...locsMap };
+
+  if (!interests) return { newQuests, newLocations };
+
+  if (interests.mushroom >= 2) {
+    const quest: Quest = {
+      id: "special_mushroom_quest",
+      title: "✨ Mushroom Glow Study ✨",
+      description: "Help Pip map the glowing violet caps growing on the rotting oak logs.",
+      placeholder: "I studied the pattern of the glowing spores...",
+      initialSaying: "“Look at those purple caps! Let's examine their glow together.”",
+      rewardItemId: "mossy_bark",
+      isLocked: false,
+      unlockCondition: "",
+      locationId: "forest"
+    };
+    newQuests.special_mushroom_quest = quest;
+    if (newLocations.forest && !newLocations.forest.questIds.includes(quest.id)) {
+      newLocations.forest = {
+        ...newLocations.forest,
+        questIds: [...newLocations.forest.questIds, quest.id]
+      };
+    }
+  }
+
+  if (interests.space >= 2) {
+    const quest: Quest = {
+      id: "special_star_quest",
+      title: "✨ Starlight Constellations ✨",
+      description: "Pip wants to trace the rabbit constellation through the library telescope.",
+      placeholder: "I looked through the lens and drew the stars forming the long ears...",
+      initialSaying: "“The telescope is aligned! Can you see the rabbit ears in the sky?”",
+      rewardItemId: "silver_acorn",
+      isLocked: false,
+      unlockCondition: "",
+      locationId: "library"
+    };
+    newQuests.special_star_quest = quest;
+    if (newLocations.library && !newLocations.library.questIds.includes(quest.id)) {
+      newLocations.library = {
+        ...newLocations.library,
+        questIds: [...newLocations.library.questIds, quest.id]
+      };
+    }
+  }
+
+  if (interests.bug >= 2) {
+    const quest: Quest = {
+      id: "special_bug_quest",
+      title: "✨ Catching Fireflies ✨",
+      description: "Count the bioluminescent fireflies dancing over the meadow grass.",
+      placeholder: "I watched the fireflies blink in sequence and logged their pattern...",
+      initialSaying: "“Fireflies! Look at how they blink together! Can you count them?”",
+      rewardItemId: "lantern",
+      isLocked: false,
+      unlockCondition: "",
+      locationId: "meadow"
+    };
+    newQuests.special_bug_quest = quest;
+    if (newLocations.meadow && !newLocations.meadow.questIds.includes(quest.id)) {
+      newLocations.meadow = {
+        ...newLocations.meadow,
+        questIds: [...newLocations.meadow.questIds, quest.id]
+      };
+    }
+  }
+
+  return { newQuests, newLocations };
+};
+
+
 type CompanionContextType = {
   companion: Companion | null;
   isQuestCompleted: boolean;
@@ -133,10 +211,13 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 });
               }
 
+              const dbInterests = dbComp.interests ?? {};
+              const { newQuests, newLocations } = injectReactiveQuests(dbInterests, questsMap, locsMap);
+
               setDraftObjects(activeDraftsList);
               setActiveItems(itemsMap);
-              setActiveQuests(questsMap);
-              setActiveLocations(locsMap);
+              setActiveQuests(newQuests);
+              setActiveLocations(newLocations);
 
               setCompanion({
                 id: dbComp.id,
@@ -149,6 +230,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 cabbitLocation: (dbComp.cabbit_location as CompanionLocation) ?? "rug",
                 createdAt: dbComp.created_at,
                 inventory: inventoryList,
+                interests: dbInterests,
               });
 
               // Fetch synthesized journal entries
@@ -250,10 +332,18 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
 
           if (savedCompanion) {
             const parsed = JSON.parse(savedCompanion);
+            const interests = parsed.interests || {};
             setCompanion({
               ...parsed,
               inventory: parsed.inventory || [],
+              interests: interests,
             });
+
+            const baseQuests = savedQuests ? JSON.parse(savedQuests) : QUESTS;
+            const baseLocations = savedLocs ? JSON.parse(savedLocs) : LOCATIONS;
+            const { newQuests, newLocations } = injectReactiveQuests(interests, baseQuests, baseLocations);
+            setActiveQuests(newQuests);
+            setActiveLocations(newLocations);
           }
           if (savedQuest) {
             setIsQuestCompleted(JSON.parse(savedQuest) === true);
@@ -309,6 +399,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       cabbitLocation: "rug",
       createdAt,
       inventory: [],
+      interests: {},
     };
 
     setCompanion(newCompanion);
@@ -351,6 +442,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           carrot_coins: 128,
           cabbit_mood: "idle",
           cabbit_location: "rug",
+          interests: {},
           created_at: newCompanion.createdAt,
         });
       } catch (error) {
@@ -398,6 +490,33 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       newInventory.push(rewardItemId);
     }
 
+    const obsLower = userObservation.toLowerCase();
+    const nextInterests = { ...(companion.interests || {}) };
+
+    let matchedTopic: "mushroom" | "space" | "bug" | null = null;
+    if (obsLower.includes("mushroom") || obsLower.includes("fungus") || obsLower.includes("toadstool") || obsLower.includes("spore")) {
+      nextInterests.mushroom = (nextInterests.mushroom || 0) + 1;
+      matchedTopic = "mushroom";
+    } else if (obsLower.includes("star") || obsLower.includes("telescope") || obsLower.includes("sky") || obsLower.includes("moon") || obsLower.includes("constellation")) {
+      nextInterests.space = (nextInterests.space || 0) + 1;
+      matchedTopic = "space";
+    } else if (obsLower.includes("bug") || obsLower.includes("insect") || obsLower.includes("butterfly") || obsLower.includes("firefly") || obsLower.includes("beetle")) {
+      nextInterests.bug = (nextInterests.bug || 0) + 1;
+      matchedTopic = "bug";
+    }
+
+    const { newQuests, newLocations } = injectReactiveQuests(nextInterests, activeQuests, activeLocations);
+    setActiveQuests(newQuests);
+    setActiveLocations(newLocations);
+
+    // Save dynamic approved registers to local storage
+    try {
+      localStorage.setItem("cabbits_approved_quests_v1", JSON.stringify(newQuests));
+      localStorage.setItem("cabbits_approved_locations_v1", JSON.stringify(newLocations));
+    } catch (e) {
+      console.error("Local save failed for active collections:", e);
+    }
+
     const updatedCompanion: Companion = {
       ...companion,
       curiosity: newCuriosity,
@@ -405,6 +524,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       carrotCoins: companion.carrotCoins + coinReward,
       cabbitMood: "happy",
       inventory: newInventory,
+      interests: nextInterests,
     };
 
     setCompanion(updatedCompanion);
@@ -629,6 +749,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
             insights_count: newInsightsCount,
             carrot_coins: companion.carrotCoins + coinReward,
             cabbit_mood: "happy",
+            interests: nextInterests,
           })
           .eq("id", companion.id);
 

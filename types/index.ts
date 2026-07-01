@@ -14,6 +14,7 @@ export type Companion = {
   cabbitLocation: CompanionLocation;
   createdAt: string;
   inventory: string[];
+  interests: Record<string, number>;
 };
 
 export type CompanionMemory = {

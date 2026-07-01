@@ -136,7 +136,21 @@ export function getCompanionGreeting(
     return thoughts[Math.floor(Math.random() * thoughts.length)];
   }
 
-  // 4. Personality & Weather matching
+  // 4. Thematic Interest Quest Announcements (20% chance)
+  const interests = companion.interests || {};
+  if (Math.random() < 0.20) {
+    if (interests.mushroom >= 2) {
+      return `I noticed we've been observing mushrooms a lot! I prepared a special study quest for us at the Oak Forest. Let's go mapping!`;
+    }
+    if (interests.space >= 2) {
+      return `I've been thinking about the night sky since you observed stars. I prepared a special star mapping quest at the Secret Library!`;
+    }
+    if (interests.bug >= 2) {
+      return `Bugs are so interesting! Since we've been observing insects, I added a special Catching Fireflies quest at the Green Meadow!`;
+    }
+  }
+
+  // 5. Personality & Weather matching
   const personality = companion.temperament.toLowerCase();
   const pool = PERSONALITY_GREETINGS[personality] || PERSONALITY_GREETINGS.curious;
 

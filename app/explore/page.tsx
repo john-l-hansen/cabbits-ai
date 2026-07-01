@@ -230,17 +230,28 @@ export default function ExplorePage() {
                   return (
                     <div
                       key={q.id}
-                      className={`flex items-center gap-3 p-2.5 rounded-2xl border-2 border-black/40 shadow-3xs ${
-                        completed ? "bg-emerald-50/40 opacity-70" : locked ? "bg-black/5 opacity-60" : "bg-white"
+                      className={`flex items-center gap-3 p-2.5 rounded-2xl border-2 shadow-3xs relative overflow-hidden ${
+                        completed
+                          ? "bg-emerald-50/40 border-black/40 opacity-70"
+                          : locked
+                            ? "bg-black/5 border-black/40 opacity-60"
+                            : q.id.startsWith("special_")
+                              ? "bg-amber-50/40 border-amber-500"
+                              : "bg-white border-black/40"
                       }`}
                     >
+                      {q.id.startsWith("special_") && !completed && (
+                        <div className="absolute top-0.5 right-2 text-[7px] font-bold text-amber-600 uppercase tracking-widest animate-pulse font-sans">
+                          ✨ Pip's Discovery ✨
+                        </div>
+                      )}
                       <span className="text-sm shrink-0">
                         {completed ? "✔️" : locked ? "🔒" : "✨"}
                       </span>
                       <div className="flex-1 min-w-0">
                         <h5 className="text-xs font-bold text-black/80 truncate">{q.title}</h5>
                         <p className="text-[10px] text-black/40 uppercase tracking-wide">
-                          {completed ? "COMPLETED" : locked ? `LOCKED (${q.unlockCondition})` : "AVAILABLE"}
+                          {completed ? "COMPLETED" : locked ? `LOCKED (${q.unlockCondition})` : q.id.startsWith("special_") ? "REACTIVE QUEST" : "AVAILABLE"}
                         </p>
                       </div>
                     </div>
