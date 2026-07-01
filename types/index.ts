@@ -61,4 +61,15 @@ export type DraftObject = {
   createdAt: string;
 };
 
+export type JournalEntry = {
+  id: string;
+  companionId: string;
+  topic: string;
+  summary: string;
+  icon: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+
 

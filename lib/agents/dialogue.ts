@@ -1,4 +1,4 @@
-import { Companion } from "@/types";
+import { Companion, JournalEntry } from "@/types";
 
 // Dynamic Personality Greetings Pool
 const PERSONALITY_GREETINGS: Record<
@@ -104,7 +104,8 @@ const PERSONALITY_GREETINGS: Record<
 export function getCompanionGreeting(
   companion: Companion,
   weather: "sunny" | "rainy" | "snowy",
-  timeOfDay: "morning" | "afternoon" | "evening" | "night"
+  timeOfDay: "morning" | "afternoon" | "evening" | "night",
+  journalEntries: JournalEntry[] = []
 ): string {
   // 1. Sleeping state override
   if (companion.cabbitMood === "sleeping") {
@@ -123,7 +124,19 @@ export function getCompanionGreeting(
     return `We have collected ${companion.carrotCoins} coins! That is a heavy coin bag. Shall we buy a new adventure in the library?`;
   }
 
-  // 3. Personality & Weather matching
+  // 3. Memory Synthesis Reflection Override (25% chance)
+  if (journalEntries && journalEntries.length > 0 && Math.random() < 0.25) {
+    const entry = journalEntries[Math.floor(Math.random() * journalEntries.length)];
+    const thoughts = [
+      `I've been reviewing my journal notes on ${entry.topic}... ${entry.summary}`,
+      `I was just thinking about our study of ${entry.topic}! Remember? ${entry.summary}`,
+      `Nature is so fascinating. My notebook page on ${entry.topic} says: ${entry.summary}`,
+      `Look! I drew a little picture next to our ${entry.topic} note: ${entry.summary}`
+    ];
+    return thoughts[Math.floor(Math.random() * thoughts.length)];
+  }
+
+  // 4. Personality & Weather matching
   const personality = companion.temperament.toLowerCase();
   const pool = PERSONALITY_GREETINGS[personality] || PERSONALITY_GREETINGS.curious;
 

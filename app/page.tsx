@@ -52,6 +52,7 @@ export default function Home() {
     books,
     items,
     draftObjects,
+    journalEntries,
     resetCompanion,
     feedCabbit,
     toggleSleep,
@@ -72,6 +73,8 @@ export default function Home() {
   const [zoomTransition, setZoomTransition] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [profileSubTab, setProfileSubTab] = useState<"info" | "dreams">("info");
+  const [backpackSubTab, setBackpackSubTab] = useState<"items" | "journal">("items");
+  const [selectedJournal, setSelectedJournal] = useState<any>(null);
 
   // Time Tick Hook
   useEffect(() => {
@@ -117,10 +120,10 @@ export default function Home() {
       else if (hour >= 17 && hour < 21) timeOfDay = "evening";
       else timeOfDay = "night";
 
-      const text = getCompanionGreeting(companion, weather, timeOfDay);
+      const text = getCompanionGreeting(companion, weather, timeOfDay, journalEntries);
       setBubbleText(text);
     }
-  }, [companion, weather]);
+  }, [companion, weather, journalEntries]);
 
   if (isLoading || !companion) {
     return (
@@ -149,7 +152,7 @@ export default function Home() {
     else if (hour >= 17 && hour < 21) timeOfDay = "evening";
     else timeOfDay = "night";
 
-    setBubbleText(getCompanionGreeting(companion, weather, timeOfDay));
+    setBubbleText(getCompanionGreeting(companion, weather, timeOfDay, journalEntries));
   };
 
   // Feed trigger wrapper
@@ -503,45 +506,108 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Collectible Items */}
-              <div className="pt-2.5 border-t border-black/10">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Collectible Items</h4>
-                {!companion.inventory || companion.inventory.length === 0 ? (
-                  <p className="text-[11px] text-black/40 italic leading-normal">
-                    No collectibles found yet. Explore land pins on the map to earn items!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-3 gap-2">
-                    {companion.inventory.map((itemId) => {
-                      const item = items[itemId];
-                      if (!item) return null;
-                      return (
-                        <button
-                          key={itemId}
-                          onClick={() => setSelectedItem(item)}
-                          className="p-2 bg-[#FAF7F0] border-2 border-black/40 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-black/5 active:scale-95 transition-all"
-                        >
-                          <span className="text-2xl select-none">{item.icon}</span>
-                          <span className="text-[9px] font-bold text-black/80 mt-1 truncate w-full">{item.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+              {/* Tab Toggle buttons */}
+              <div className="flex gap-2 p-1 bg-black/5 rounded-full border border-black/5">
+                <button
+                  onClick={() => setBackpackSubTab("items")}
+                  className={`flex-1 py-1.5 rounded-full font-bold text-xs cursor-pointer active:scale-97 transition-all ${
+                    backpackSubTab === "items" ? "bg-white text-black shadow-3xs border border-black/5" : "text-black/50 hover:text-black/75"
+                  }`}
+                >
+                  Collectibles
+                </button>
+                <button
+                  onClick={() => setBackpackSubTab("journal")}
+                  className={`flex-1 py-1.5 rounded-full font-bold text-xs cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 ${
+                    backpackSubTab === "journal" ? "bg-white text-black shadow-3xs border border-black/5" : "text-black/50 hover:text-black/75"
+                  }`}
+                >
+                  <span>Pip's Journal</span>
+                  {journalEntries.length > 0 && (
+                    <span className="bg-[var(--accent-dark)] text-white rounded-full text-[9px] h-4 min-w-4 px-1 flex items-center justify-center font-bold">
+                      {journalEntries.length}
+                    </span>
+                  )}
+                </button>
               </div>
 
-              {/* Dynamic Reading List summary */}
-              <div className="pt-2.5 border-t border-black/10">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Book Progress</h4>
-                <div className="space-y-2">
-                  {books.map((b) => (
-                    <div key={b.id} className="flex justify-between items-center text-xs font-medium">
-                      <span>{b.title}</span>
-                      <span className="text-black/50">{b.progress}%</span>
+              {backpackSubTab === "items" ? (
+                /* Collectible Items & Book progress */
+                <div className="space-y-4 animate-fade-in">
+                  <div className="pt-1.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Collectible Items</h4>
+                    {!companion.inventory || companion.inventory.length === 0 ? (
+                      <p className="text-[11px] text-black/40 italic leading-normal">
+                        No collectibles found yet. Explore land pins on the map to earn items!
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        {companion.inventory.map((itemId) => {
+                          const item = items[itemId];
+                          if (!item) return null;
+                          return (
+                            <button
+                              key={itemId}
+                              onClick={() => setSelectedItem(item)}
+                              className="p-2 bg-[#FAF7F0] border-2 border-black/40 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-black/5 active:scale-95 transition-all"
+                            >
+                              <span className="text-2xl select-none">{item.icon}</span>
+                              <span className="text-[9px] font-bold text-black/80 mt-1 truncate w-full">{item.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-2.5 border-t border-black/10">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Book Progress</h4>
+                    <div className="space-y-2">
+                      {books.map((b) => (
+                        <div key={b.id} className="flex justify-between items-center text-xs font-medium">
+                          <span>{b.title}</span>
+                          <span className="text-black/50">{b.progress}%</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Pip's Journal notes summary */
+                <div className="space-y-4 animate-fade-in text-center">
+                  <p className="text-[11px] leading-normal text-black/60">
+                    Consolidated learning logs written down by {companion.name} during your outdoor exploration.
+                  </p>
+
+                  {journalEntries.length === 0 ? (
+                    <div className="p-8 text-center bg-white border-2 border-dashed border-black/25 rounded-2xl">
+                      <span className="text-3xl select-none">✏️</span>
+                      <p className="text-xs text-black/40 italic mt-2">
+                        The journal is empty. Complete quests on the Explore Map to synthesize lessons!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                      {journalEntries.map((j) => (
+                        <button
+                          key={j.id}
+                          onClick={() => setSelectedJournal(j)}
+                          className="w-full flex items-center gap-3 p-3 bg-white hover:bg-black/5 border-2 border-black/45 rounded-2xl shadow-3xs text-left cursor-pointer active:scale-97 transition-all"
+                        >
+                          <span className="text-2.5xl select-none shrink-0">{j.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs font-bold text-black/85 truncate">{j.topic}</h4>
+                            <p className="text-[9px] text-black/40 mt-0.5">
+                              Saved {new Date(j.updatedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span className="text-black/20 text-sm">➡️</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -730,6 +796,57 @@ export default function Home() {
                 className="w-full rounded-full bg-[var(--accent-dark)] py-2.5 text-center font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition-all text-xs cursor-pointer"
               >
                 Close Details
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PARCHMENT JOURNAL PAGE OVERLAY */}
+        {selectedJournal && (
+          <div className="absolute inset-0 z-45 bg-black/45 backdrop-blur-3xs flex items-center justify-center p-6 animate-fade-in">
+            <div className="bg-[#FAF4E5] border-4 border-black/85 rounded-[2rem] p-6 w-full max-w-[280px] shadow-2xl relative space-y-4">
+              {/* Binder ring hole styling */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex gap-4">
+                <div className="h-5 w-5 bg-[#E5DDC8] border-2 border-black rounded-full shadow-3xs" />
+                <div className="h-5 w-5 bg-[#E5DDC8] border-2 border-black rounded-full shadow-3xs" />
+                <div className="h-5 w-5 bg-[#E5DDC8] border-2 border-black rounded-full shadow-3xs" />
+              </div>
+
+              <button
+                onClick={() => setSelectedJournal(null)}
+                className="absolute top-4 right-4 text-xs font-bold text-black/45 hover:text-black cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="pt-2 text-center">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-dark)]">
+                  Pip's Field Journal
+                </span>
+                <div className="mx-auto h-14 w-14 bg-white border-2 border-black/60 rounded-full flex items-center justify-center text-3xl shadow-3xs mt-2 select-none">
+                  {selectedJournal.icon}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-base font-bold text-black/85 leading-tight">{selectedJournal.topic}</h3>
+                <span className="text-[9px] uppercase tracking-wider text-black/40 font-bold block mt-0.5">
+                  LOGGED: {new Date(selectedJournal.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              {/* Vintage ruled lines body */}
+              <div className="p-3 bg-[#FCF8EE] border border-black/15 rounded-xl text-left space-y-1 shadow-inner relative overflow-hidden">
+                <p className="text-xs text-black/75 leading-normal relative z-10 font-sans">
+                  “{selectedJournal.summary}”
+                </p>
+              </div>
+
+              <button
+                onClick={() => setSelectedJournal(null)}
+                className="w-full rounded-full bg-[var(--accent-dark)] py-2.5 text-center font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition-all text-xs cursor-pointer"
+              >
+                Close Notebook
               </button>
             </div>
           </div>

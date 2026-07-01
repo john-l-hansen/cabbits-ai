@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation, Item, DraftObject } from "@/types";
+import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation, Item, DraftObject, JournalEntry } from "@/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { runAgentSimulation } from "@/lib/agents/simulation";
 import { DEFAULT_BOOKS } from "@/lib/data/books";
@@ -20,6 +20,7 @@ type CompanionContextType = {
   quests: Record<string, Quest>;
   locations: Record<string, Location>;
   draftObjects: DraftObject[];
+  journalEntries: JournalEntry[];
   createCompanion: (name: string, temperament: CompanionTemperament) => Promise<void>;
   completeQuest: (userObservation: string, questId?: string) => Promise<void>;
   resetCompanion: () => Promise<void>;
@@ -63,6 +64,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
   const [activeQuests, setActiveQuests] = useState<Record<string, Quest>>(QUESTS);
   const [activeLocations, setActiveLocations] = useState<Record<string, Location>>(LOCATIONS);
   const [draftObjects, setDraftObjects] = useState<DraftObject[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
 
   // Initialize and load state
   useEffect(() => {
@@ -149,6 +151,26 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 inventory: inventoryList,
               });
 
+              // Fetch synthesized journal entries
+              const { data: dbJournal, error: journalError } = await supabase
+                .from("companion_journal")
+                .select("*")
+                .eq("companion_id", dbComp.id)
+                .order("updated_at", { ascending: false });
+
+              if (dbJournal && !journalError) {
+                const mappedJournal: JournalEntry[] = dbJournal.map((j) => ({
+                  id: j.id,
+                  companionId: j.companion_id,
+                  topic: j.topic,
+                  summary: j.summary,
+                  icon: j.icon,
+                  createdAt: j.created_at,
+                  updatedAt: j.updated_at,
+                }));
+                setJournalEntries(mappedJournal);
+              }
+
               // Fetch memory entries
               const { data: dbMemories, error: memoriesError } = await supabase
                 .from("companion_memories")
@@ -216,6 +238,10 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           // Load drafts
           const savedDrafts = localStorage.getItem("cabbits_drafts_v1");
           if (savedDrafts) setDraftObjects(JSON.parse(savedDrafts));
+
+          // Load journal entries
+          const savedJournal = localStorage.getItem("cabbits_journal_v1");
+          if (savedJournal) setJournalEntries(JSON.parse(savedJournal));
 
           const savedCompanion = localStorage.getItem(COMPANION_STORAGE_KEY);
           const savedQuest = localStorage.getItem(QUEST_STORAGE_KEY);
@@ -289,6 +315,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     setIsQuestCompleted(false);
     setMemories([]);
     setDraftObjects([]);
+    setJournalEntries([]);
     setActiveItems(ITEMS);
     setActiveQuests(QUESTS);
     setActiveLocations(LOCATIONS);
@@ -307,6 +334,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("cabbits_approved_items_v1");
       localStorage.removeItem("cabbits_approved_quests_v1");
       localStorage.removeItem("cabbits_approved_locations_v1");
+      localStorage.removeItem("cabbits_journal_v1");
     } catch (error) {
       console.error("Local save failed:", error);
     }
@@ -517,6 +545,71 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Memory Synthesis Compiler
+    let synthTopic = "";
+    let synthSummary = "";
+    let synthIcon = "";
+
+    if (questId === "watch_ripples") {
+      synthTopic = "Water Circles";
+      synthSummary = "We studied how concentric ripples expand when raindrops hit Crescent Pond. Large drops transfer more kinetic energy, producing faster-traveling wave rings!";
+      synthIcon = "💧";
+    } else if (questId === "count_flowers") {
+      synthTopic = "Meadow Flora";
+      synthSummary = "We counted yellow buttercups clustered together in Green Meadow. They organize in clusters to optimize solar capture and share root resources.";
+      synthIcon = "🌸";
+    } else if (questId === "notice_one_thing") {
+      synthTopic = "Acorn Stashes";
+      synthSummary = "We searched the leaf litter under the ancient Oak tree. Acorn caches placed by squirrels near roots help oak saplings spread and take root.";
+      synthIcon = "🐿️";
+    } else if (questId === "pearl_hunt") {
+      synthTopic = "Moonlit Minerals";
+      synthSummary = "We recovered a glowing white pearl from the pond silt. Its luminescence comes from natural minerals absorbing twilight rays.";
+      synthIcon = "🔮";
+    } else if (questId === "nectar_brew") {
+      synthTopic = "Distilled Elixirs";
+      synthSummary = "We distilled clover blooms in the meadow. Condensing organic sugars preserves their nutritional value and stores energy.";
+      synthIcon = "🧪";
+    } else if (questId === "bark_rubbing") {
+      synthTopic = "Tree Carvings";
+      synthSummary = "We traced the spiral engravings on the ancient oak tree bark. These markings are records of changes or guideposts for travelers.";
+      synthIcon = "🪵";
+    }
+
+    let updatedJournal = [...journalEntries];
+    if (synthTopic && synthSummary && synthIcon) {
+      const existingIdx = journalEntries.findIndex((j) => j.topic === synthTopic);
+      const nowIso = new Date().toISOString();
+      
+      if (existingIdx > -1) {
+        const updatedEntry = {
+          ...journalEntries[existingIdx],
+          summary: synthSummary,
+          updatedAt: nowIso
+        };
+        updatedJournal[existingIdx] = updatedEntry;
+      } else {
+        const newEntry: JournalEntry = {
+          id: generateUUID(),
+          companionId: companion.id,
+          topic: synthTopic,
+          summary: synthSummary,
+          icon: synthIcon,
+          createdAt: nowIso,
+          updatedAt: nowIso
+        };
+        updatedJournal = [newEntry, ...journalEntries];
+      }
+
+      setJournalEntries(updatedJournal);
+
+      try {
+        localStorage.setItem("cabbits_journal_v1", JSON.stringify(updatedJournal));
+      } catch (e) {
+        console.error("Local save failed for journal:", e);
+      }
+    }
+
     // Local Storage Cache
     try {
       localStorage.setItem(COMPANION_STORAGE_KEY, JSON.stringify(updatedCompanion));
@@ -566,6 +659,22 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
             status: "draft",
             created_at: newlyCreatedDraft.createdAt
           });
+        }
+
+        // Insert/Upsert synthesized journal to DB
+        if (synthTopic && synthSummary && synthIcon) {
+          const entry = updatedJournal.find((j) => j.topic === synthTopic);
+          if (entry) {
+            await supabase.from("companion_journal").upsert({
+              id: entry.id,
+              companion_id: companion.id,
+              topic: entry.topic,
+              summary: entry.summary,
+              icon: entry.icon,
+              created_at: entry.createdAt,
+              updated_at: entry.updatedAt
+            }, { onConflict: "companion_id,topic" });
+          }
         }
       } catch (error) {
         console.error("Failed database connection:", error);
@@ -881,6 +990,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     setMemories([]);
     setBooks([]);
     setDraftObjects([]);
+    setJournalEntries([]);
     setActiveItems(ITEMS);
     setActiveQuests(QUESTS);
     setActiveLocations(LOCATIONS);
@@ -894,6 +1004,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("cabbits_approved_items_v1");
       localStorage.removeItem("cabbits_approved_quests_v1");
       localStorage.removeItem("cabbits_approved_locations_v1");
+      localStorage.removeItem("cabbits_journal_v1");
     } catch (error) {
       console.error("Local reset failed:", error);
     }
@@ -916,6 +1027,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         quests: activeQuests,
         locations: activeLocations,
         draftObjects,
+        journalEntries,
         createCompanion,
         completeQuest,
         resetCompanion,

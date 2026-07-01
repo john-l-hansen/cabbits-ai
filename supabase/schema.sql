@@ -141,4 +141,36 @@ CREATE POLICY "Allow public update access to companion_draft_objects" ON public.
 CREATE POLICY "Allow public delete access to companion_draft_objects" ON public.companion_draft_objects
     FOR DELETE USING (true);
 
+-- Create companion_journal table
+CREATE TABLE IF NOT EXISTS public.companion_journal (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    companion_id UUID NOT NULL REFERENCES public.companions(id) ON DELETE CASCADE,
+    topic TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(companion_id, topic)
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_journal_companion_id ON public.companion_journal(companion_id);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.companion_journal ENABLE ROW LEVEL SECURITY;
+
+-- Policies for companion_journal
+CREATE POLICY "Allow public read access to companion_journal" ON public.companion_journal
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow public insert access to companion_journal" ON public.companion_journal
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update access to companion_journal" ON public.companion_journal
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public delete access to companion_journal" ON public.companion_journal
+    FOR DELETE USING (true);
+
+
 
