@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useCompanion } from "@/components/providers/CompanionProvider";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { Patrick_Hand } from "next/font/google";
+import { LOCATIONS, Location } from "@/lib/data/locations";
+import { QUESTS, Quest } from "@/lib/data/quests";
 
 const patrickHand = Patrick_Hand({
   weight: "400",
@@ -13,66 +15,12 @@ const patrickHand = Patrick_Hand({
   display: "swap",
 });
 
-type LocationKey = "pond" | "meadow" | "forest" | "burrow" | "library";
-
-type QuestInfo = {
-  id: string;
-  title: string;
-  isLocked: boolean;
-  unlockCondition: string;
-};
-
-type LocationDetails = {
-  name: string;
-  description: string;
-  quests: QuestInfo[];
-};
-
-const LOCATION_DATA: Record<LocationKey, LocationDetails> = {
-  forest: {
-    name: "Oak Forest",
-    description: "A dense, mystical woodland where the ancient oaks whisper secrets to those who listen closely.",
-    quests: [
-      { id: "notice_one_thing", title: "Find the Silver Acorn", isLocked: false, unlockCondition: "" },
-      { id: "wise_owl", title: "Speak to the Wise Owl", isLocked: true, unlockCondition: "Requires 1 Insight" },
-    ],
-  },
-  pond: {
-    name: "Crescent Pond",
-    description: "A calm, reflective body of water. Golden lilies float on the surface, catching ripples of wind.",
-    quests: [
-      { id: "watch_ripples", title: "Watch the Water Ripples", isLocked: false, unlockCondition: "" },
-    ],
-  },
-  meadow: {
-    name: "Green Meadow",
-    description: "A sprawling field of tall grasses and bright wildflowers. Home to hummingbirds and sweet clover.",
-    quests: [
-      { id: "count_flowers", title: "Count the Wildflowers", isLocked: false, unlockCondition: "" },
-    ],
-  },
-  burrow: {
-    name: "Pip's Burrow",
-    description: "A cozy underground home with warm lanterns and comfortable tunnels dug beneath the tree roots.",
-    quests: [
-      { id: "tidy_tunnel", title: "Tidy up the Tunnel", isLocked: true, unlockCondition: "Requires 1 Insight" },
-    ],
-  },
-  library: {
-    name: "Secret Library",
-    description: "An ancient stone structure hidden behind ivy walls. The shelves contain dusty volumes of forgotten lore.",
-    quests: [
-      { id: "decipher_rune", title: "Decipher the Rune", isLocked: true, unlockCondition: "Requires 2 Insights" },
-    ],
-  },
-};
-
 export default function ExplorePage() {
   const { companion, isLoading, memories } = useCompanion();
   const router = useRouter();
 
   const [timeStr, setTimeStr] = useState("10:30 AM");
-  const [selectedLoc, setSelectedLoc] = useState<LocationKey | null>(null);
+  const [selectedLoc, setSelectedLoc] = useState<string | null>(null);
 
   // Redirect if companion is not created
   useEffect(() => {
@@ -119,7 +67,7 @@ export default function ExplorePage() {
   };
 
   // Evaluate dynamic lock status based on companion progress
-  const evaluateLockStatus = (quest: QuestInfo) => {
+  const evaluateLockStatus = (quest: Quest) => {
     if (!quest.isLocked) return false;
     if (quest.id === "wise_owl" || quest.id === "tidy_tunnel") {
       return companion.insightsCount < 1;
@@ -130,10 +78,15 @@ export default function ExplorePage() {
     return true;
   };
 
-  const activeDetails = selectedLoc ? LOCATION_DATA[selectedLoc] : null;
+  const activeDetails = selectedLoc ? LOCATIONS[selectedLoc] : null;
+
+  // Retrieve quest entities linked to this location
+  const locationQuests = activeDetails
+    ? activeDetails.questIds.map((id) => QUESTS[id]).filter(Boolean)
+    : [];
 
   // Find the primary launchable quest in the active location
-  const primaryQuest = activeDetails?.quests.find(
+  const primaryQuest = locationQuests.find(
     (q) => !evaluateLockStatus(q) && !isQuestCompleted(q.id)
   );
 
@@ -160,80 +113,23 @@ export default function ExplorePage() {
           className="relative flex-1 bg-cover bg-center"
           style={{ backgroundImage: "url(/assets/cabbits_overhead_map.png)" }}
         >
-          {/* PIN 1: Pond (top left) */}
-          <button
-            onClick={() => setSelectedLoc("pond")}
-            className={`absolute top-[28%] left-[28%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer`}
-          >
-            <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide">
-              Crescent Pond
-            </span>
-            <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
-              selectedLoc === "pond" ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
-            }`}>
-              🌧️
-            </div>
-          </button>
-
-          {/* PIN 2: Meadow (center) */}
-          <button
-            onClick={() => setSelectedLoc("meadow")}
-            className={`absolute top-[48%] left-[48%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer`}
-          >
-            <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide">
-              Green Meadow
-            </span>
-            <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
-              selectedLoc === "meadow" ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
-            }`}>
-              🌸
-            </div>
-          </button>
-
-          {/* PIN 3: Oak Forest (top right) */}
-          <button
-            onClick={() => setSelectedLoc("forest")}
-            className={`absolute top-[28%] left-[75%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer`}
-          >
-            <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide">
-              Oak Forest
-            </span>
-            <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
-              selectedLoc === "forest" ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
-            }`}>
-              🌳
-            </div>
-          </button>
-
-          {/* PIN 4: Burrow (bottom right) */}
-          <button
-            onClick={() => setSelectedLoc("burrow")}
-            className={`absolute top-[70%] left-[75%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer`}
-          >
-            <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide">
-              Pip's Burrow
-            </span>
-            <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
-              selectedLoc === "burrow" ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
-            }`}>
-              🏡
-            </div>
-          </button>
-
-          {/* PIN 5: Secret Library (bottom left) */}
-          <button
-            onClick={() => setSelectedLoc("library")}
-            className={`absolute top-[76%] left-[28%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer`}
-          >
-            <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide">
-              Secret Library
-            </span>
-            <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
-              selectedLoc === "library" ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
-            }`}>
-              🏛️
-            </div>
-          </button>
+          {Object.values(LOCATIONS).map((loc) => (
+            <button
+              key={loc.id}
+              onClick={() => setSelectedLoc(loc.id)}
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer animate-fade-in"
+              style={{ top: loc.top, left: loc.left }}
+            >
+              <span className="absolute -top-6 text-[10px] bg-black/75 text-white px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity font-sans tracking-wide pointer-events-none whitespace-nowrap">
+                {loc.name}
+              </span>
+              <div className={`h-8 w-8 rounded-full border-2 border-black flex items-center justify-center text-sm transition-all ${
+                selectedLoc === loc.id ? "bg-amber-300 scale-110 shadow-xs" : "bg-white/90 hover:bg-white"
+              }`}>
+                {loc.pinEmoji}
+              </div>
+            </button>
+          ))}
         </div>
 
         {/* BOTTOM NAV BAR */}
@@ -303,7 +199,7 @@ export default function ExplorePage() {
               <h4 className="text-xs font-bold uppercase tracking-wider text-black/40">Quests Here</h4>
               
               <div className="space-y-2">
-                {activeDetails.quests.map((q) => {
+                {locationQuests.map((q) => {
                   const completed = isQuestCompleted(q.id);
                   const locked = evaluateLockStatus(q);
 

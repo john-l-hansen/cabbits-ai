@@ -5,6 +5,8 @@ import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { useCompanion } from "@/components/providers/CompanionProvider";
+import { QUESTS } from "@/lib/data/quests";
+import { ITEMS } from "@/lib/data/items";
 
 const thinkingSteps = [
   "Orchestrator: Analyzing observation keywords...",
@@ -25,31 +27,7 @@ function QuestContent() {
   const [stepIndex, setStepIndex] = useState(0);
   const [error, setError] = useState("");
 
-  const QUEST_PROMPTS: Record<
-    string,
-    { title: string; description: string; placeholder: string; initialSaying: string }
-  > = {
-    notice_one_thing: {
-      title: "Notice one thing.",
-      description: "Look around the room and choose one object. What could it teach us if we studied it closely?",
-      placeholder: "I noticed the potted ivy leaf. It has structured veins branching out to feed the tip...",
-      initialSaying: "“We can start small. Curiosity usually does. Tell me about any object in the room.”",
-    },
-    watch_ripples: {
-      title: "Watch the Water Ripples",
-      description: "Walk over torescent Pond. Watch the ripples on the water. What patterns do they make?",
-      placeholder: "I noticed that when a raindrop hits the center, it forms concentric rings expanding outwards in perfect circles...",
-      initialSaying: "“Water carries reflections and secrets. Let's study how the waves dance on the surface.”",
-    },
-    count_flowers: {
-      title: "Count the Wildflowers",
-      description: "Walk into the Green Meadow and study the wildflowers. Pick a group of colors and describe how they cluster.",
-      placeholder: "I observed a cluster of five yellow buttercups growing tight against a purple clover stem...",
-      initialSaying: "“Meadows are full of numbers! Let's count how nature clusters its colors.”",
-    },
-  };
-
-  const activeQuest = QUEST_PROMPTS[questId] || QUEST_PROMPTS.notice_one_thing;
+  const activeQuest = QUESTS[questId] || QUESTS.notice_one_thing;
 
   // Redirect to companion creation if none exists
   useEffect(() => {
@@ -153,6 +131,9 @@ function QuestContent() {
 
   const exitUrl = questId === "notice_one_thing" ? "/" : "/explore";
 
+  // Check if quest rewarded an item
+  const rewardItem = activeQuest.rewardItemId ? ITEMS[activeQuest.rewardItemId] : null;
+
   return (
     <main className="min-h-screen px-6 py-8">
       <section className="mx-auto max-w-md rounded-[2rem] border border-black/10 bg-white/75 p-6 shadow-sm backdrop-blur">
@@ -186,7 +167,7 @@ function QuestContent() {
           </div>
         ) : isThisQuestCompleted && parsedMemory ? (
           /* 2. Quest Completed Screen */
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6 animate-fade-in">
             <div className="flex justify-center">
               <CompanionOrb mood="idle" curiosity={companion.curiosity} />
             </div>
@@ -199,6 +180,18 @@ function QuestContent() {
                 {companion.name} registered your reflection and filled +{parsedMemory.curiosityEarned} Curiosity!
               </p>
             </div>
+
+            {/* Collectible Reward Item Announcement */}
+            {rewardItem && (
+              <div className="rounded-2xl border-2 border-dashed border-amber-500/40 bg-amber-50/20 p-4 flex items-center gap-3.5 shadow-3xs">
+                <span className="text-4xl shrink-0 select-none animate-bounce">{rewardItem.icon}</span>
+                <div className="text-left min-w-0">
+                  <h4 className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">New Collectible Added!</h4>
+                  <h5 className="text-sm font-extrabold text-black/85">{rewardItem.name}</h5>
+                  <p className="text-[11px] text-black/60 leading-relaxed truncate">{rewardItem.description}</p>
+                </div>
+              </div>
+            )}
 
             <div className="rounded-2xl border border-black/10 bg-white p-5 space-y-4 shadow-2xs">
               <div>
@@ -257,7 +250,7 @@ function QuestContent() {
 
             <Link
               href={exitUrl}
-              className="block w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 text-center font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
+              className="block w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 text-center font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer active:scale-95 text-sm"
             >
               {questId === "notice_one_thing" ? "Return Home" : "Return to Map"}
             </Link>
@@ -303,7 +296,7 @@ function QuestContent() {
 
               <button
                 type="submit"
-                className="w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
+                className="w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer active:scale-95 text-sm"
               >
                 Submit Observation
               </button>

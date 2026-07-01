@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation } from "@/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { runAgentSimulation } from "@/lib/agents/simulation";
+import { DEFAULT_BOOKS } from "@/lib/data/books";
+import { QUESTS } from "@/lib/data/quests";
 
 type CompanionContextType = {
   companion: Companion | null;
@@ -41,78 +43,6 @@ const generateUUID = () => {
   });
 };
 
-const DEFAULT_BOOKS: Omit<Book, "progress" | "isFavorite">[] = [
-  {
-    id: "missing_acorns",
-    title: "The Missing Acorns",
-    category: "stories",
-    coverGradient: "from-[#a0522d] to-[#cd853f]",
-    coverEmoji: "🐿️",
-    ageRange: "4-7",
-    readingTime: "5m",
-    skills: ["Reading", "Vocabulary", "Forest Animals"],
-    description: "Moss is missing his winter acorns! Help Pip explore the oak trees and locate the hidden stash.",
-    isNew: true,
-  },
-  {
-    id: "curious_numbers",
-    title: "The Curious Numbers",
-    category: "math",
-    coverGradient: "from-[#4682b4] to-[#1e90ff]",
-    coverEmoji: "🧮",
-    ageRange: "5-8",
-    readingTime: "7m",
-    skills: ["Counting", "Simple Addition", "Patterns"],
-    description: "Discover the magic numbers of rabbit valley. Count carrots and learn basic arithmetic scales.",
-  },
-  {
-    id: "bunny_bridge",
-    title: "Build the Bunny Bridge",
-    category: "logic",
-    coverGradient: "from-[#556b2f] to-[#8fbc8f]",
-    coverEmoji: "🌉",
-    ageRange: "6-9",
-    readingTime: "8m",
-    skills: ["Logic Paths", "Sequencing", "Engineering"],
-    description: "The spring stream has flooded! Help construct a safe bridge using logs and stones in correct order.",
-  },
-  {
-    id: "treasure_map",
-    title: "The Pirate Treasure Map",
-    category: "stories",
-    coverGradient: "from-[#d2691e] to-[#ff8c00]",
-    coverEmoji: "🗺️",
-    ageRange: "6-10",
-    readingTime: "10m",
-    skills: ["Problem Solving", "Navigation", "Coordinates"],
-    description: "Chart a course based on Captain Rabbiton's ancient clues and recover the sand beach chest.",
-  },
-  {
-    id: "moonlight_observatory",
-    title: "Moonlight Observatory",
-    category: "science",
-    coverGradient: "from-[#483d8b] to-[#191970]",
-    coverEmoji: "🔭",
-    ageRange: "7-12",
-    readingTime: "6m",
-    skills: ["Astronomy", "Nature Observation", "Space Patterns"],
-    description: "Study constellations and learn moon phases through the lens of a giant telescope.",
-    isLocked: true,
-  },
-  {
-    id: "potion_workshop",
-    title: "Potion Workshop",
-    category: "creativity",
-    coverGradient: "from-[#9932cc] to-[#8b008b]",
-    coverEmoji: "🧪",
-    ageRange: "5-10",
-    readingTime: "8m",
-    skills: ["Math Recipes", "Measurement", "Color Mixing"],
-    description: "Stir, bubble, and mix liquid formulas to unlock colorful magical effects.",
-    isLocked: true,
-  },
-];
-
 export function CompanionProvider({ children }: { children: React.ReactNode }) {
   const [companion, setCompanion] = useState<Companion | null>(null);
   const [isQuestCompleted, setIsQuestCompleted] = useState<boolean>(false);
@@ -138,6 +68,14 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
               .maybeSingle();
 
             if (dbComp && !compError) {
+              // Fetch companion items from Supabase
+              const { data: dbItems, error: itemsError } = await supabase
+                .from("companion_items")
+                .select("item_id")
+                .eq("companion_id", dbComp.id);
+
+              const inventoryList = dbItems && !itemsError ? dbItems.map((it) => it.item_id) : [];
+
               setCompanion({
                 id: dbComp.id,
                 name: dbComp.name,
@@ -148,6 +86,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 cabbitMood: (dbComp.cabbit_mood as CompanionMood) ?? "idle",
                 cabbitLocation: (dbComp.cabbit_location as CompanionLocation) ?? "rug",
                 createdAt: dbComp.created_at,
+                inventory: inventoryList,
               });
 
               // Fetch memory entries
@@ -211,7 +150,11 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           const savedBooksState = localStorage.getItem(BOOKS_STATE_STORAGE_KEY);
 
           if (savedCompanion) {
-            setCompanion(JSON.parse(savedCompanion));
+            const parsed = JSON.parse(savedCompanion);
+            setCompanion({
+              ...parsed,
+              inventory: parsed.inventory || [],
+            });
           }
           if (savedQuest) {
             setIsQuestCompleted(JSON.parse(savedQuest) === true);
@@ -266,6 +209,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       cabbitMood: "idle",
       cabbitLocation: "rug",
       createdAt,
+      inventory: [],
     };
 
     setCompanion(newCompanion);
@@ -341,12 +285,23 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
 
     // Quest completions award carrot coins! (+30 coins)
     const coinReward = 30;
+
+    // Check if quest awards a collectible item
+    const questData = QUESTS[questId];
+    const rewardItemId = questData?.rewardItemId;
+
+    let newInventory = [...companion.inventory];
+    if (rewardItemId && !newInventory.includes(rewardItemId)) {
+      newInventory.push(rewardItemId);
+    }
+
     const updatedCompanion: Companion = {
       ...companion,
       curiosity: newCuriosity,
       insightsCount: newInsightsCount,
       carrotCoins: companion.carrotCoins + coinReward,
       cabbitMood: "happy",
+      inventory: newInventory,
     };
 
     setCompanion(updatedCompanion);
@@ -398,7 +353,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           })
           .eq("id", companion.id);
 
-        const { error } = await supabase.from("companion_memories").insert({
+        const { error: memError } = await supabase.from("companion_memories").insert({
           id: memoryId,
           companion_id: companion.id,
           content: contentJson,
@@ -406,10 +361,19 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           created_at: createdAt,
         });
 
-        if (error) {
-          console.error("Failed to save memory to Supabase:", error);
-        } else {
-          console.log("Cabbits: Persisted memory entry to Supabase.");
+        if (memError) {
+          console.error("Failed to save memory to Supabase:", memError);
+        }
+
+        // Save companion item if new
+        if (rewardItemId) {
+          const { error: itemError } = await supabase.from("companion_items").insert({
+            companion_id: companion.id,
+            item_id: rewardItemId,
+          });
+          if (itemError) {
+            console.warn("Failed to persist companion item to Supabase:", itemError);
+          }
         }
       } catch (error) {
         console.error("Failed database client connection:", error);
@@ -436,7 +400,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
       const serializable = updatedBooks.map((b) => ({ id: b.id, progress: b.progress, isFavorite: b.isFavorite }));
       localStorage.setItem(BOOKS_STATE_STORAGE_KEY, JSON.stringify(serializable));
     } catch (e) {
-      console.error("Local save failed for favorite:", e);
+      console.error("Local save failed for book favorite toggle:", e);
     }
 
     // Persist to Supabase if configured

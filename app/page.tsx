@@ -7,6 +7,7 @@ import { useCompanion } from "@/components/providers/CompanionProvider";
 import { CompanionOrb } from "@/components/companion/CompanionOrb";
 import { CompanionMood } from "@/types";
 import { Patrick_Hand } from "next/font/google";
+import { ITEMS, Item } from "@/lib/data/items";
 
 const patrickHand = Patrick_Hand({
   weight: "400",
@@ -64,6 +65,7 @@ export default function Home() {
   const [showMailbox, setShowMailbox] = useState(false);
   const [readLetters, setReadLetters] = useState<string[]>([]);
   const [zoomTransition, setZoomTransition] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   // Time Tick Hook
   useEffect(() => {
@@ -84,6 +86,20 @@ export default function Home() {
       router.replace("/companion/new");
     }
   }, [isLoading, companion, router]);
+
+  // Hash listener to open drawers on redirect
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleHash = () => {
+        const hash = window.location.hash;
+        if (hash === "#inventory") setActiveSheet("inventory");
+        else if (hash === "#profile") setActiveSheet("profile");
+      };
+      handleHash();
+      window.addEventListener("hashchange", handleHash);
+      return () => window.removeEventListener("hashchange", handleHash);
+    }
+  }, [companion]);
 
   // Set default initial dialog bubble
   useEffect(() => {
@@ -504,8 +520,35 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Collectible Items */}
+              <div className="pt-2.5 border-t border-black/10">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Collectible Items</h4>
+                {!companion.inventory || companion.inventory.length === 0 ? (
+                  <p className="text-[11px] text-black/40 italic leading-normal">
+                    No collectibles found yet. Explore land pins on the map to earn items!
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {companion.inventory.map((itemId) => {
+                      const item = ITEMS[itemId];
+                      if (!item) return null;
+                      return (
+                        <button
+                          key={itemId}
+                          onClick={() => setSelectedItem(item)}
+                          className="p-2 bg-[#FAF7F0] border-2 border-black/40 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-black/5 active:scale-95 transition-all"
+                        >
+                          <span className="text-2xl select-none">{item.icon}</span>
+                          <span className="text-[9px] font-bold text-black/80 mt-1 truncate w-full">{item.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Dynamic Reading List summary */}
-              <div className="pt-2">
+              <div className="pt-2.5 border-t border-black/10">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-2">Book Progress</h4>
                 <div className="space-y-2">
                   {books.map((b) => (
@@ -586,6 +629,41 @@ export default function Home() {
                   Reset Companion
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ITEM DETAILS POPUP OVERLAY */}
+        {selectedItem && (
+          <div className="absolute inset-0 z-45 bg-black/45 backdrop-blur-3xs flex items-center justify-center p-6 animate-fade-in">
+            <div className="bg-[#FAF7F0] border-4 border-black rounded-[2rem] p-6 w-full max-w-[280px] shadow-2xl relative text-center space-y-4">
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-4 right-4 text-xs font-bold text-black/45 hover:text-black cursor-pointer"
+              >
+                ✕
+              </button>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-dark)]">
+                  Item Discovery
+                </span>
+                <div className="mx-auto h-16 w-16 bg-white border-2 border-black/60 rounded-full flex items-center justify-center text-3xl shadow-3xs animate-bounce mt-2 select-none">
+                  {selectedItem.icon}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-black/85 leading-tight">{selectedItem.name}</h3>
+                <span className="text-[9px] uppercase tracking-wider text-black/40 font-bold block mt-0.5">
+                  Origin: {selectedItem.locationOrigin}
+                </span>
+              </div>
+              <p className="text-xs text-black/65 leading-relaxed leading-normal">{selectedItem.description}</p>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="w-full rounded-full bg-[var(--accent-dark)] py-2.5 text-center font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition-all text-xs cursor-pointer"
+              >
+                Close Details
+              </button>
             </div>
           </div>
         )}

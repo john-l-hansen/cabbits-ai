@@ -13,6 +13,7 @@ export type Companion = {
   cabbitMood: CompanionMood;
   cabbitLocation: CompanionLocation;
   createdAt: string;
+  inventory: string[];
 };
 
 export type CompanionMemory = {
@@ -40,3 +41,13 @@ export type Book = {
   progress: number;
   isFavorite: boolean;
 };
+
+export type Item = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  type: "consumable" | "collectible";
+  locationOrigin: string;
+};
+

@@ -81,3 +81,32 @@ CREATE POLICY "Allow public update access to companion_books" ON public.companio
 
 CREATE POLICY "Allow public delete access to companion_books" ON public.companion_books
     FOR DELETE USING (true);
+
+-- Create companion_items table
+CREATE TABLE IF NOT EXISTS public.companion_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    companion_id UUID NOT NULL REFERENCES public.companions(id) ON DELETE CASCADE,
+    item_id TEXT NOT NULL,
+    acquired_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(companion_id, item_id)
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_items_companion_id ON public.companion_items(companion_id);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.companion_items ENABLE ROW LEVEL SECURITY;
+
+-- Policies for companion_items
+CREATE POLICY "Allow public read access to companion_items" ON public.companion_items
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow public insert access to companion_items" ON public.companion_items
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update access to companion_items" ON public.companion_items
+    FOR UPDATE USING (true);
+
+CREATE POLICY "Allow public delete access to companion_items" ON public.companion_items
+    FOR DELETE USING (true);
+
