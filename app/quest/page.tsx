@@ -135,13 +135,13 @@ function QuestContent() {
   const rewardItem = activeQuest.rewardItemId ? ITEMS[activeQuest.rewardItemId] : null;
 
   return (
-    <main className="min-h-screen px-6 py-8">
-      <section className="mx-auto max-w-md rounded-[2rem] border border-black/10 bg-white/75 p-6 shadow-sm backdrop-blur">
+    <main className="min-h-screen bg-[var(--neutral-200)] px-6 py-8 flex justify-center items-center">
+      <section className="mx-auto w-full max-w-md rounded-[2rem] border-2 border-[var(--neutral-1000)] bg-[var(--neutral-0)] p-6 shadow-sm">
         <div className="flex items-center justify-between">
-          <Link href={exitUrl} className="text-sm text-black/50 hover:text-black/80 transition-colors">
+          <Link href={exitUrl} className="text-sm text-[var(--neutral-500)] hover:text-[var(--neutral-900)] transition-colors">
             ← Back
           </Link>
-          <span className="text-xs font-semibold tracking-wider text-black/35 uppercase">
+          <span className="text-xs font-bold tracking-wider text-[var(--neutral-500)] uppercase">
             Active Quest
           </span>
         </div>
@@ -150,17 +150,17 @@ function QuestContent() {
         {isSubmitting ? (
           <div className="my-12 flex flex-col items-center">
             <CompanionOrb mood="new" curiosity={companion.curiosity} />
-            <div className="mt-8 w-full rounded-2xl bg-[var(--surface-soft)] p-5 text-left border border-black/5 shadow-xs">
+            <div className="mt-8 w-full rounded-2xl bg-[var(--neutral-50)] p-5 text-left border-2 border-[var(--neutral-300)] shadow-xs">
               <div className="flex items-center gap-2 mb-3">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--neutral-1000)] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--neutral-1000)]"></span>
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent-dark)]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-900)]">
                   Agent Orchestration
                 </span>
               </div>
-              <p className="text-sm leading-6 font-mono text-black/75 animate-pulse min-h-[3rem]">
+              <p className="text-sm leading-6 font-mono text-[var(--neutral-700)] animate-pulse min-h-[3rem]">
                 {currentStepMessage}
               </p>
             </div>
@@ -173,84 +173,84 @@ function QuestContent() {
             </div>
 
             <div className="text-center">
-              <h1 className="text-3xl font-semibold tracking-tight text-emerald-800">
+              <h1 className="text-3xl font-bold tracking-tight text-[var(--neutral-900)]">
                 Quest Complete
               </h1>
-              <p className="mt-2 text-sm text-black/60">
+              <p className="mt-2 text-sm text-[var(--neutral-500)]">
                 {companion.name} registered your reflection and filled +{parsedMemory.curiosityEarned} Curiosity!
               </p>
             </div>
 
             {/* Collectible Reward Item Announcement */}
             {rewardItem && (
-              <div className="rounded-2xl border-2 border-dashed border-amber-500/40 bg-amber-50/20 p-4 flex items-center gap-3.5 shadow-3xs">
+              <div className="rounded-2xl border-2 border-dashed border-[var(--neutral-1000)] bg-[var(--neutral-50)] p-4 flex items-center gap-3.5 shadow-3xs">
                 <span className="text-4xl shrink-0 select-none animate-bounce">{rewardItem.icon}</span>
                 <div className="text-left min-w-0">
-                  <h4 className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">New Collectible Added!</h4>
-                  <h5 className="text-sm font-extrabold text-black/85">{rewardItem.name}</h5>
-                  <p className="text-[11px] text-black/60 leading-relaxed truncate">{rewardItem.description}</p>
+                  <h4 className="text-[10px] font-bold text-[var(--neutral-700)] uppercase tracking-wider">New Collectible Added!</h4>
+                  <h5 className="text-sm font-extrabold text-[var(--neutral-900)]">{rewardItem.name}</h5>
+                  <p className="text-[11px] text-[var(--neutral-500)] leading-relaxed truncate">{rewardItem.description}</p>
                 </div>
               </div>
             )}
 
-            <div className="rounded-2xl border border-black/10 bg-white p-5 space-y-4 shadow-2xs">
+            <div className="rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] p-5 space-y-4 shadow-2xs">
               <div>
-                <span className="text-xxs font-bold uppercase tracking-wider text-black/40">
+                <span className="text-xxs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
                   Your Observation
                 </span>
-                <p className="mt-1 text-sm font-medium text-black/80">
+                <p className="mt-1 text-sm font-medium text-[var(--neutral-900)]">
                   “{parsedMemory.userObservation}”
                 </p>
               </div>
 
-              <hr className="border-black/5" />
+              <hr className="border-[var(--neutral-200)]" />
 
               <div>
-                <span className="flex items-center gap-2 text-xxs font-bold uppercase tracking-wider text-[var(--accent)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                <span className="flex items-center gap-2 text-xxs font-bold uppercase tracking-wider text-[var(--neutral-1000)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--neutral-1000)]" />
                   {parsedMemory.routedSpecialist} Specialist Feedback
                 </span>
-                <p className="mt-1.5 text-sm leading-6 text-black/75">
+                <p className="mt-1.5 text-sm leading-6 text-[var(--neutral-700)]">
                   {parsedMemory.specialistFeedback}
                 </p>
               </div>
 
-              <hr className="border-black/5" />
+              <hr className="border-[var(--neutral-200)]" />
 
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <span className="text-xxs font-bold uppercase tracking-wider text-black/40">
+                  <span className="text-xxs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
                     Evaluation Depth
                   </span>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                    <span className="rounded-full bg-[var(--neutral-200)] border border-[var(--neutral-300)] px-2.5 py-0.5 text-xs font-semibold text-[var(--neutral-900)]">
                       {parsedMemory.evaluationRating}
                     </span>
-                    <span className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-850 flex items-center gap-0.5">
+                    <span className="rounded-full bg-[var(--neutral-1000)] text-white px-2.5 py-0.5 text-xs font-semibold flex items-center gap-0.5">
                       ✨ +{parsedMemory.curiosityEarned} Curiosity
                     </span>
                   </div>
                 </div>
                 {parsedMemory.evaluationFeedback && (
-                  <p className="text-xs text-black/55 flex-1 text-right italic">
+                  <p className="text-xs text-[var(--neutral-500)] flex-1 text-right italic">
                     {parsedMemory.evaluationFeedback}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[var(--surface-soft)] p-5 border border-black/5">
-              <p className="text-xs font-bold uppercase tracking-wider text-black/45">
+            <div className="rounded-2xl bg-[var(--neutral-50)] p-5 border-2 border-[var(--neutral-300)]">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
                 {companion.name} reflects
               </p>
-              <p className="mt-2 leading-7 text-black/80 font-medium">
+              <p className="mt-2 leading-7 text-[var(--neutral-900)] font-medium">
                 {parsedMemory.companionReflection}
               </p>
             </div>
 
             <Link
               href={exitUrl}
-              className="block w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 text-center font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer active:scale-95 text-sm"
+              className="block w-full rounded-full bg-[var(--neutral-1000)] px-5 py-4 text-center font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] transition-all cursor-pointer active:scale-95 text-sm"
             >
               {questId === "notice_one_thing" ? "Return Home" : "Return to Map"}
             </Link>
@@ -262,13 +262,13 @@ function QuestContent() {
               <CompanionOrb mood="quest" curiosity={companion.curiosity} />
             </div>
 
-            <h1 className="text-3xl font-semibold tracking-tight">{activeQuest.title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--neutral-900)]">{activeQuest.title}</h1>
 
-            <p className="mt-3 leading-7 text-black/65">{activeQuest.description}</p>
+            <p className="mt-3 leading-7 text-[var(--neutral-700)]">{activeQuest.description}</p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-black/65">Describe your observation</span>
+                <span className="text-sm font-medium text-[var(--neutral-700)]">Describe your observation</span>
                 <textarea
                   value={observation}
                   onChange={(e) => {
@@ -276,19 +276,19 @@ function QuestContent() {
                     if (e.target.value.trim().length >= 10) setError("");
                   }}
                   rows={4}
-                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none focus:border-[var(--accent)] transition-all resize-none leading-6 text-sm"
+                  className="rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] px-4 py-3 outline-none focus:border-[var(--neutral-1000)] transition-all resize-none leading-6 text-sm text-[var(--neutral-900)]"
                   placeholder={activeQuest.placeholder}
                   maxLength={250}
                 />
                 <div className="flex justify-between items-center px-1">
                   {error ? (
-                    <span className="text-xs text-red-500/80 font-medium">{error}</span>
+                    <span className="text-xs text-red-500 font-medium">{error}</span>
                   ) : (
-                    <span className="text-xs text-black/35 font-medium">
+                    <span className="text-xs text-[var(--neutral-500)] font-medium">
                       Be descriptive to consult a specialist
                     </span>
                   )}
-                  <span className="text-xs text-black/30 font-mono">
+                  <span className="text-xs text-[var(--neutral-500)] font-mono">
                     {observation.length}/250
                   </span>
                 </div>
@@ -296,17 +296,17 @@ function QuestContent() {
 
               <button
                 type="submit"
-                className="w-full rounded-full bg-[var(--accent-dark)] px-5 py-4 font-medium text-white shadow-sm hover:brightness-110 transition-all cursor-pointer active:scale-95 text-sm"
+                className="w-full rounded-full bg-[var(--neutral-1000)] px-5 py-4 font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] transition-all cursor-pointer active:scale-95 text-sm"
               >
                 Submit Observation
               </button>
             </form>
 
-            <div className="mt-8 rounded-2xl bg-[var(--surface-soft)] p-5 border border-black/5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-black/45">
+            <div className="mt-8 rounded-2xl bg-[var(--neutral-50)] p-5 border-2 border-[var(--neutral-300)]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--neutral-500)]">
                 {companion.name} says
               </p>
-              <p className="mt-2 leading-7 text-black/75">{activeQuest.initialSaying}</p>
+              <p className="mt-2 leading-7 text-[var(--neutral-700)]">{activeQuest.initialSaying}</p>
             </div>
           </div>
         )}
@@ -318,10 +318,10 @@ function QuestContent() {
 export default function QuestPage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen px-6 py-8 flex items-center justify-center">
+      <main className="min-h-screen px-6 py-8 flex items-center justify-center bg-[var(--neutral-50)]">
         <div className="animate-pulse flex flex-col items-center gap-4">
           <CompanionOrb mood="idle" />
-          <p className="text-sm text-black/40">Loading quest...</p>
+          <p className="text-sm text-[var(--neutral-500)]">Loading quest...</p>
         </div>
       </main>
     }>

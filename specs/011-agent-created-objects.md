@@ -34,3 +34,16 @@ Build the proposal engine (Phase 4 of the roadmap) where completing quests trigg
 - Completing a landmark quest spawns a draft item/quest in Pip's Dream Log.
 - Approving the draft makes it appear in the Backpack drawer (if item) or Explore Map (if quest).
 - Discarding the draft clears it.
+
+---
+
+## Future Roadmap Reminder: Item Generation Engine Tool
+
+> [!IMPORTANT]
+> **Trigger Condition**: When transitioning the proposal loop from hardcoded/local regex parsing to a live LLM orchestration stack (Phase 4), build a dedicated **Item Generation Tool**.
+> 
+> **Tool Responsibilities**:
+> 1. Parse keepsake descriptions during onboarding to dynamically output matching titles, slots, descriptions, and emojis.
+> 2. Parse Quest observations to generate dynamic draft objects, lore, and achievements.
+> 3. Verify item balance parameters (e.g. rarity weights, properties) before adding to database tables.
+

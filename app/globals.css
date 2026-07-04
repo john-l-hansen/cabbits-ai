@@ -1,18 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f5ef;
-  --foreground: #191612;
-  --surface: #ffffff;
-  --surface-soft: #efe7dc;
-  --accent: #6f8f72;
-  --accent-dark: #476146;
-  --gold: #d8b46a;
+  --neutral-0: #ffffff;
+  --neutral-50: #f9f9f9;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #cccccc;
+  --neutral-500: #7b7b7b;
+  --neutral-700: #474747;
+  --neutral-900: #181818;
+  --neutral-1000: #000000;
+
+  --background: var(--neutral-50);
+  --foreground: var(--neutral-900);
+  --surface: var(--neutral-0);
+  --surface-soft: var(--neutral-200);
+  --accent: var(--neutral-1000);
+  --accent-dark: var(--neutral-900);
+  --gold: var(--neutral-500);
 }
 
 body {
-  background: radial-gradient(circle at top, #fffaf0 0%, var(--background) 45%, #eee4d6 100%);
-  color: var(--foreground);
+  background-color: var(--neutral-50);
+  color: var(--neutral-900);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -20,32 +29,127 @@ body {
   box-sizing: border-box;
 }
 
+/* Authentic Wireframe Image Placeholder (Diagonal Cross) */
+.wireframe-placeholder {
+  position: relative;
+  background-color: var(--neutral-50);
+  border: 2px dashed var(--neutral-300);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.wireframe-placeholder::before,
+.wireframe-placeholder::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.wireframe-placeholder::before {
+  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--neutral-200) 50%, transparent calc(50% + 1px));
+}
+.wireframe-placeholder::after {
+  background: linear-gradient(to top left, transparent calc(50% - 1px), var(--neutral-200) 50%, transparent calc(50% + 1px));
+}
+
 @keyframes orb-pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 20px 80px rgba(71,97,70,0.18);
+    box-shadow: 0 0 0 2px var(--neutral-1000);
   }
   50% {
-    transform: scale(1.04);
-    box-shadow: 0 25px 90px rgba(71,97,70,0.28);
-  }
-}
-
-@keyframes orb-inner-pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.25;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 0.4;
+    transform: scale(1.03);
+    box-shadow: 0 0 0 4px var(--neutral-1000);
   }
 }
 
 .animate-orb-pulse {
-  animation: orb-pulse 6s ease-in-out infinite;
+  animation: orb-pulse 4s ease-in-out infinite;
 }
 
-.animate-orb-inner-pulse {
-  animation: orb-inner-pulse 4s ease-in-out infinite;
+/* Isometric 3D Projection Engine */
+.isometric-stage {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
 }
+
+.isometric-grid-canvas {
+  transform: rotateX(60deg) rotateZ(-45deg);
+  transform-style: preserve-3d;
+}
+
+.isometric-billboard-sprite {
+  transform: rotateZ(45deg) rotateX(-60deg);
+  transform-style: preserve-3d;
+}
+
+/* Chunky Handcrafted Panels & Cards */
+.chunky-panel {
+  background-color: var(--neutral-0);
+  border: 4px solid var(--neutral-1000);
+  box-shadow: 4px 4px 0px 0px var(--neutral-1000);
+  border-radius: 16px; /* Soft, rounded paper-doll/wooden edges */
+}
+
+/* Tactile Clickable Toy Buttons */
+.chunky-button {
+  background-color: var(--neutral-0);
+  border: 4px solid var(--neutral-1000);
+  box-shadow: 3px 3px 0px 0px var(--neutral-1000);
+  border-radius: 12px; /* Soft, handcrafted forms */
+  font-weight: 900;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chunky-button:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px var(--neutral-1000);
+}
+
+.chunky-button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0px 0px var(--neutral-1000);
+}
+
+.chunky-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Segmented RPG Status Gauges */
+.segmented-meter {
+  display: flex;
+  gap: 3px;
+}
+
+.segmented-cell {
+  height: 12px;
+  flex: 1;
+  border: 2px solid var(--neutral-1000);
+  background-color: var(--neutral-200);
+  border-radius: 1px;
+}
+
+.segmented-cell.active-energy {
+  background-color: #10b981; /* Green */
+}
+
+.segmented-cell.active-hunger {
+  background-color: #f97316; /* Orange */
+}
+
+.segmented-cell.active-mood {
+  background-color: #eab308; /* Yellow/Gold */
+}
+
+.segmented-cell.active-coins {
+  background-color: #facc15; /* Gold */
+}
+
+
