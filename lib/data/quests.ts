@@ -388,97 +388,97 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
   }),
   library_ivy: (vars) => ({
     id: "library_ivy",
-    title: "Ivy Overgrowth Clearance",
-    description: `Thick ivy has covered a block of ${vars.count} stone tiles on the ancient stone library wall.`,
+    title: "The Curiosity Study Desk",
+    description: `Help Pip inspect the green desk lamp, the warm steaming mug, and the ${vars.count} open notebooks on the wooden study desk.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“The ivy is blocking the old carvings. Let's clear it away, ${vars.name}!”`,
+    initialSaying: `“This desk is so cozy, ${vars.name}! Look at Pip's notebooks—let's examine what he wrote.”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "library",
-    poiId: "Ivy Stone Walls",
+    poiId: "Study Desk",
     xpReward: 200,
     choices: [
       {
         id: "logic",
         type: "logical",
-        text: "Map Grid Coordinates",
-        description: `Construct a 2D coordinate grid over the ${vars.count} tiles to trace the hidden stone seams.`
+        text: "Verify Ink Formulas",
+        description: "Calculate the dilution ratio of water to black pigment for the permanent ink bottle."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Read Ivy Growth Runes",
-        description: "Recite the traditional ivy growth poem to locate the key joints where roots are loose."
+        text: "Read the Wisdom Signs",
+        description: "Translate the cursive scripts on the wall signs: 'Curiosity is the key' and 'Knowledge grows when shared.'"
       },
       {
         id: "practical",
         type: "practical",
-        text: "Prune Structural Roots",
-        description: "Use pruning shears to cut the central thick ivy roots without damaging the historic stones."
+        text: "Trim the Desk Lamp Wick",
+        description: "Carefully trim the wick of the oil lantern next to the desk to keep the flame bright and clean."
       }
     ]
   }),
   library_shelves: (vars) => ({
     id: "library_shelves",
-    title: "Catalog the Tomes",
-    description: `A stack of ${vars.count} ancient scrolls and book volumes is lying unsorted on the table.`,
+    title: "Organize the Reading Rug",
+    description: `A total of ${vars.count} loose scrolls and scattered books are lying around the blue rug. Help organize them.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“So much forgotten knowledge here! Let's arrange them neatly, ${vars.name}.”`,
+    initialSaying: `“Oh, it looks like a big breeze blew all the loose pages off the desk! Let's clean them up, ${vars.name}!”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "library",
-    poiId: "Forgotten Lore Shelves",
+    poiId: "Reading Rug",
     xpReward: 200,
     choices: [
       {
         id: "logic",
         type: "logical",
-        text: "Sort Chronologically",
-        description: `Sort the ${vars.count} scrolls by historical cycles using their seal stamps.`
+        text: "Sort Pages by Index Number",
+        description: "Sort the loose parchment sheets numerically and bind them into a single volume."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Translate Title Dialect",
-        description: "Translate the old titles from ancient Cabbits dialect and document them in the library ledger."
+        text: "Catalog Book Titles",
+        description: "Read and write down the titles of the scattered books into the library ledger."
       },
       {
         id: "practical",
         type: "practical",
-        text: "Dust and Restore Scrolls",
-        description: "Use a soft dry feather brush to remove dust and wrap worn scrolls in protective linen cases."
+        text: "Stack Books Neatly",
+        description: "Carefully dust each book cover and stack them in neat piles beside the low table."
       }
     ]
   }),
   library_tablet: (vars) => ({
     id: "library_tablet",
-    title: "Decipher the Rune",
-    description: `The glowing stone tablet features ${vars.count} engraved glyph symbols. Decode them.`,
+    title: "Bluebirds at the Round Window",
+    description: `A pair of bluebirds is nesting on the sill of the large round window, chirping at a volume of ${vars.count} decibels. Inspect the window area.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“These runes date back to the early Cabbits. Let's study them, ${vars.name}!”`,
+    initialSaying: `“Listen to their sweet songs! The sunbeams shining through are so warm, ${vars.name}!”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "library",
-    poiId: "Glowing Rune Tablet",
+    poiId: "Round Window",
     xpReward: 200,
     choices: [
       {
         id: "logic",
         type: "logical",
-        text: "Decode Numerical Cypher",
-        description: "Examine the geometric line intersections of the symbols to extract the cypher code."
+        text: "Calculate Angle of Sunbeams",
+        description: "Measure the angle of the incoming light beams to calculate the hour of the afternoon."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Inscribe Ancient Lyrics",
-        description: "Recite the corresponding verses of the ancient Cabbits saga that mention these symbols."
+        text: "Translate the Bird Songs",
+        description: "Listen closely to the chirps and guess what forest news the bluebirds are sharing."
       },
       {
         id: "practical",
         type: "practical",
-        text: "Make Charcoal Rubbing",
-        description: "Place a thin parchment sheet over the slate and rub charcoal to capture the grooves clearly."
+        text: "Clear the Window Sill",
+        description: "Gently brush away dust, dry leaves, and loose feathers from the wooden window frame."
       }
     ]
   })

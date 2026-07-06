@@ -35,7 +35,7 @@ const locationExtraMetadata: Record<string, {
     items: ["Sweet Carrot", "Glowing Lichen Jar"],
   },
   library: {
-    pointsOfInterest: ["Ivy Stone Walls", "Forgotten Lore Shelves", "Glowing Rune Tablet"],
+    pointsOfInterest: ["Study Desk", "Reading Rug", "Round Window"],
     characters: ["Elder Owl"],
     items: ["Deciphered Rune Key"],
   },
@@ -275,6 +275,9 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
       meadow_buttercups: ["Inspect round wooden door", "Examine wood grain frames", "Sweep welcome step stone"],
       meadow_clover: ["Measure log diameter", "Listen for inner echo sound", "Clear blocked leaves inside"],
       meadow_hummingbird: ["Gather scattered acorns", "Sort acorns by cap types", "Stack neatly by the stump"],
+      library_ivy: ["Inspect green desk lamp", "Read wall wisdom signs", "Check the warm steaming mug"],
+      library_shelves: ["Gather scattered pages", "Sort pages numerically", "Stack books by the table"],
+      library_tablet: ["Clean the round window sill", "Observe the nesting bluebirds", "Measure sunbeam angles"],
     };
     return maps[qId] || ["Explore the landmark area", "Log your observations in the journal", "Return to your companion"];
   };
