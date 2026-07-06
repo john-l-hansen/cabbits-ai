@@ -17,17 +17,17 @@ const thinkingSteps = [
 ];
 
 function QuestContent() {
-  const { companion, memories, completeQuest, isLoading } = useCompanion();
+  const { companion, memories, completeQuest, isLoading, completedQuestIds } = useCompanion();
   const searchParams = useSearchParams();
-  const questId = searchParams.get("questId") || "notice_one_thing";
+  const questId = searchParams.get("questId") || "pond_lilies";
   const router = useRouter();
 
-  const [observation, setObservation] = useState("");
+  const [selectedChoiceId, setSelectedChoiceId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [error, setError] = useState("");
 
-  const activeQuest = QUESTS[questId] || QUESTS.notice_one_thing;
+  const activeQuest = QUESTS[questId] || QUESTS.pond_lilies;
 
   // Redirect to companion creation if none exists
   useEffect(() => {
@@ -47,7 +47,7 @@ function QuestContent() {
       } else {
         timer = setTimeout(async () => {
           try {
-            await completeQuest(observation, questId);
+            await completeQuest(questId, selectedChoiceId);
           } catch (err) {
             setError("Something went wrong. Let's try again.");
           } finally {
@@ -57,7 +57,7 @@ function QuestContent() {
       }
     }
     return () => clearTimeout(timer);
-  }, [isSubmitting, stepIndex, observation, questId, completeQuest]);
+  }, [isSubmitting, stepIndex, selectedChoiceId, questId, completeQuest]);
 
   if (isLoading || !companion) {
     return (
@@ -71,56 +71,49 @@ function QuestContent() {
   }
 
   // Parse specific quest completion status
-  const questMemory = memories.find((m) => {
-    if (m.questId === questId) return true;
-    try {
-      const parsed = JSON.parse(m.content);
-      return parsed.questId === questId;
-    } catch (e) {
-      return false;
-    }
-  });
-
-  const isThisQuestCompleted = !!questMemory;
+  const isThisQuestCompleted = completedQuestIds.includes(questId);
   let parsedMemory = null;
 
-  if (isThisQuestCompleted && questMemory) {
-    try {
-      parsedMemory = JSON.parse(questMemory.content);
-    } catch (e) {
-      parsedMemory = {
-        userObservation: observation,
-        routedSpecialist: "Generalist",
-        specialistFeedback: "Everyday objects carry hidden complexities.",
-        evaluationRating: "Developing",
-        evaluationFeedback: "",
-        companionReflection: questMemory.content,
-        curiosityEarned: 15,
-      };
+  if (isThisQuestCompleted) {
+    const questMemory = memories.find((m) => {
+      if (m.questId === questId) return true;
+      try {
+        const parsed = JSON.parse(m.content);
+        return parsed.questId === questId;
+      } catch (e) {
+        return false;
+      }
+    });
+
+    if (questMemory) {
+      try {
+        parsedMemory = JSON.parse(questMemory.content);
+      } catch (e) {
+        parsedMemory = {
+          userObservation: "Completed the landmark observation.",
+          routedSpecialist: "Generalist",
+          specialistFeedback: "Everyday objects carry hidden complexities.",
+          evaluationRating: "Thoughtful",
+          evaluationFeedback: "Positive problem-solving approach selected.",
+          companionReflection: questMemory.content,
+          curiosityEarned: 20,
+        };
+      }
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (observation.trim().length < 10) {
-      setError("Please describe your observation with a bit more detail (minimum 10 characters).");
-      return;
-    }
-    setError("");
+  const handleChoiceClick = (choiceId: string) => {
+    setSelectedChoiceId(choiceId);
     setIsSubmitting(true);
     setStepIndex(0);
   };
 
-  // Determine specialist dynamically for loader feedback
-  const textLower = observation.toLowerCase();
+  // Determine specialist dynamically for loader feedback based on chosen type
+  const activeChoice = activeQuest.choices?.find((c) => c.id === selectedChoiceId);
   let predictedSpecialist = "Generalist";
-  if (["plant", "leaf", "flower", "tree", "grass", "moss", "wood", "green", "pot", "clover", "buttercup"].some((w) => textLower.includes(w))) {
-    predictedSpecialist = "Botany";
-  } else if (["clock", "shadow", "light", "time", "sun", "mirror", "reflection", "gravity", "metal", "ripple", "water", "pond", "wave"].some((w) => textLower.includes(w))) {
-    predictedSpecialist = "Physics";
-  } else if (["book", "coin", "map", "old", "paper", "pen", "ink", "photo", "read", "rune"].some((w) => textLower.includes(w))) {
-    predictedSpecialist = "History";
-  }
+  if (activeChoice?.type === "logical") predictedSpecialist = "Logician";
+  else if (activeChoice?.type === "verbal") predictedSpecialist = "Linguist";
+  else if (activeChoice?.type === "practical") predictedSpecialist = "Craftsman";
 
   const currentStepMessage =
     stepIndex === 1
@@ -129,20 +122,18 @@ function QuestContent() {
       ? `${predictedSpecialist} Specialist: Synthesizing educational feedback...`
       : thinkingSteps[stepIndex];
 
-  const exitUrl = questId === "notice_one_thing" ? "/" : "/explore";
-
-  // Check if quest rewarded an item
+  const exitUrl = "/explore";
   const rewardItem = activeQuest.rewardItemId ? ITEMS[activeQuest.rewardItemId] : null;
 
   return (
-    <main className="min-h-screen bg-[var(--neutral-200)] px-6 py-8 flex justify-center items-center">
-      <section className="mx-auto w-full max-w-md rounded-[2rem] border-2 border-[var(--neutral-1000)] bg-[var(--neutral-0)] p-6 shadow-sm">
+    <main className="min-h-screen bg-[var(--neutral-200)] px-6 py-8 flex justify-center items-center select-none font-sans">
+      <section className="mx-auto w-full max-w-md rounded-[2rem] border-4 border-black bg-[var(--neutral-0)] p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center justify-between">
-          <Link href={exitUrl} className="text-sm text-[var(--neutral-500)] hover:text-[var(--neutral-900)] transition-colors">
-            ← Back
+          <Link href={exitUrl} className="text-xs font-black uppercase text-[var(--neutral-600)] hover:text-black transition-colors">
+            ← Exit Map
           </Link>
-          <span className="text-xs font-bold tracking-wider text-[var(--neutral-500)] uppercase">
-            Active Quest
+          <span className="text-xxs font-black tracking-wider text-[var(--neutral-500)] uppercase">
+            Quest Chamber
           </span>
         </div>
 
@@ -150,163 +141,159 @@ function QuestContent() {
         {isSubmitting ? (
           <div className="my-12 flex flex-col items-center">
             <CompanionOrb mood="new" curiosity={companion.curiosity} />
-            <div className="mt-8 w-full rounded-2xl bg-[var(--neutral-50)] p-5 text-left border-2 border-[var(--neutral-300)] shadow-xs">
+            <div className="mt-8 w-full rounded-2xl bg-[var(--neutral-50)] p-5 text-left border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center gap-2 mb-3">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--neutral-1000)] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--neutral-1000)]"></span>
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-900)]">
+                <span className="text-xxs font-black uppercase tracking-wider text-[var(--neutral-900)]">
                   Agent Orchestration
                 </span>
               </div>
-              <p className="text-sm leading-6 font-mono text-[var(--neutral-700)] animate-pulse min-h-[3rem]">
+              <p className="text-xs leading-6 font-mono text-[var(--neutral-700)] animate-pulse min-h-[3rem]">
                 {currentStepMessage}
               </p>
             </div>
           </div>
         ) : isThisQuestCompleted && parsedMemory ? (
           /* 2. Quest Completed Screen */
-          <div className="mt-6 space-y-6 animate-fade-in">
+          <div className="mt-6 space-y-6 animate-fade-in text-left">
             <div className="flex justify-center">
               <CompanionOrb mood="idle" curiosity={companion.curiosity} />
             </div>
 
             <div className="text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-[var(--neutral-900)]">
-                Quest Complete
+              <h1 className="text-2xl font-black uppercase text-[var(--neutral-900)]">
+                Quest Complete!
               </h1>
-              <p className="mt-2 text-sm text-[var(--neutral-500)]">
-                {companion.name} registered your reflection and filled +{parsedMemory.curiosityEarned} Curiosity!
+              <p className="mt-2 text-xxs font-bold text-[var(--neutral-500)] uppercase tracking-wider">
+                {companion.name} registered your action and earned +200 XP!
               </p>
             </div>
 
             {/* Collectible Reward Item Announcement */}
             {rewardItem && (
-              <div className="rounded-2xl border-2 border-dashed border-[var(--neutral-1000)] bg-[var(--neutral-50)] p-4 flex items-center gap-3.5 shadow-3xs">
+              <div className="rounded-2xl border-4 border-black bg-[#fffef0] p-4 flex items-center gap-3.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <span className="text-4xl shrink-0 select-none animate-bounce">{rewardItem.icon}</span>
                 <div className="text-left min-w-0">
-                  <h4 className="text-[10px] font-bold text-[var(--neutral-700)] uppercase tracking-wider">New Collectible Added!</h4>
-                  <h5 className="text-sm font-extrabold text-[var(--neutral-900)]">{rewardItem.name}</h5>
-                  <p className="text-[11px] text-[var(--neutral-500)] leading-relaxed truncate">{rewardItem.description}</p>
+                  <h4 className="text-[9px] font-black text-amber-800 uppercase tracking-wider">New Collectible Added!</h4>
+                  <h5 className="text-xs font-black text-[var(--neutral-900)] uppercase">{rewardItem.name}</h5>
+                  <p className="text-[10px] text-[var(--neutral-600)] leading-relaxed mt-0.5">{rewardItem.description}</p>
                 </div>
               </div>
             )}
 
-            <div className="rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] p-5 space-y-4 shadow-2xs">
+            <div className="rounded-2xl border-4 border-black bg-[var(--neutral-0)] p-5 space-y-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div>
-                <span className="text-xxs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
-                  Your Observation
+                <span className="text-xxs font-black uppercase tracking-wider text-[var(--neutral-500)]">
+                  Your Solution
                 </span>
-                <p className="mt-1 text-sm font-medium text-[var(--neutral-900)]">
+                <p className="mt-1 text-xs font-extrabold text-[var(--neutral-900)] leading-relaxed">
                   “{parsedMemory.userObservation}”
                 </p>
               </div>
 
-              <hr className="border-[var(--neutral-200)]" />
+              <hr className="border-2 border-black" />
 
               <div>
-                <span className="flex items-center gap-2 text-xxs font-bold uppercase tracking-wider text-[var(--neutral-1000)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--neutral-1000)]" />
+                <span className="flex items-center gap-2 text-xxs font-black uppercase tracking-wider text-[var(--neutral-1000)]">
+                  <span className="h-2 w-2 rounded-full bg-[var(--neutral-1000)] animate-pulse" />
                   {parsedMemory.routedSpecialist} Specialist Feedback
                 </span>
-                <p className="mt-1.5 text-sm leading-6 text-[var(--neutral-700)]">
+                <p className="mt-1.5 text-xs leading-relaxed text-[var(--neutral-700)] font-semibold">
                   {parsedMemory.specialistFeedback}
                 </p>
               </div>
 
-              <hr className="border-[var(--neutral-200)]" />
+              <hr className="border-2 border-black" />
 
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <span className="text-xxs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
-                    Evaluation Depth
+                  <span className="text-xxs font-black uppercase tracking-wider text-[var(--neutral-500)]">
+                    Quest Metrics
                   </span>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="rounded-full bg-[var(--neutral-200)] border border-[var(--neutral-300)] px-2.5 py-0.5 text-xs font-semibold text-[var(--neutral-900)]">
+                    <span className="rounded-full bg-black text-white px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider">
                       {parsedMemory.evaluationRating}
                     </span>
-                    <span className="rounded-full bg-[var(--neutral-1000)] text-white px-2.5 py-0.5 text-xs font-semibold flex items-center gap-0.5">
-                      ✨ +{parsedMemory.curiosityEarned} Curiosity
+                    <span className="rounded-full bg-[#fce8e6] text-[#c53030] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                      ✨ +200 XP
                     </span>
                   </div>
                 </div>
-                {parsedMemory.evaluationFeedback && (
-                  <p className="text-xs text-[var(--neutral-500)] flex-1 text-right italic">
-                    {parsedMemory.evaluationFeedback}
-                  </p>
-                )}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[var(--neutral-50)] p-5 border-2 border-[var(--neutral-300)]">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-500)]">
-                {companion.name} reflects
+            <div className="rounded-2xl bg-[#f7f3e6] p-5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <p className="text-xxs font-black uppercase tracking-wider text-[var(--neutral-500)]">
+                {companion.name} says
               </p>
-              <p className="mt-2 leading-7 text-[var(--neutral-900)] font-medium">
+              <p className="mt-2 text-xs leading-relaxed text-[var(--neutral-900)] font-extrabold italic">
                 {parsedMemory.companionReflection}
               </p>
             </div>
 
             <Link
               href={exitUrl}
-              className="block w-full rounded-full bg-[var(--neutral-1000)] px-5 py-4 text-center font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] transition-all cursor-pointer active:scale-95 text-sm"
+              className="block w-full py-4 text-center font-black text-white transition-all cursor-pointer active:scale-95 text-xs uppercase tracking-wider chunky-button bg-black hover:bg-neutral-900"
             >
-              {questId === "notice_one_thing" ? "Return Home" : "Return to Map"}
+              Return to Map
             </Link>
           </div>
         ) : (
           /* 3. Quest Form Input Screen */
-          <div className="mt-6">
+          <div className="mt-6 text-left">
             <div className="my-6 flex justify-center">
               <CompanionOrb mood="quest" curiosity={companion.curiosity} />
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-[var(--neutral-900)]">{activeQuest.title}</h1>
+            <h1 className="text-2xl font-black uppercase leading-snug text-[var(--neutral-900)]">{activeQuest.title}</h1>
+            <p className="mt-2 text-xxs font-bold text-neutral-500 uppercase tracking-wider">Landmark: {activeQuest.poiId}</p>
 
-            <p className="mt-3 leading-7 text-[var(--neutral-700)]">{activeQuest.description}</p>
+            <p className="mt-3 text-xs leading-relaxed text-[var(--neutral-700)] font-medium">{activeQuest.description}</p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-              <label className="grid gap-2">
-                <span className="text-sm font-medium text-[var(--neutral-700)]">Describe your observation</span>
-                <textarea
-                  value={observation}
-                  onChange={(e) => {
-                    setObservation(e.target.value);
-                    if (e.target.value.trim().length >= 10) setError("");
-                  }}
-                  rows={4}
-                  className="rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] px-4 py-3 outline-none focus:border-[var(--neutral-1000)] transition-all resize-none leading-6 text-sm text-[var(--neutral-900)]"
-                  placeholder={activeQuest.placeholder}
-                  maxLength={250}
-                />
-                <div className="flex justify-between items-center px-1">
-                  {error ? (
-                    <span className="text-xs text-red-500 font-medium">{error}</span>
-                  ) : (
-                    <span className="text-xs text-[var(--neutral-500)] font-medium">
-                      Be descriptive to consult a specialist
-                    </span>
-                  )}
-                  <span className="text-xs text-[var(--neutral-500)] font-mono">
-                    {observation.length}/250
-                  </span>
-                </div>
-              </label>
+            <div className="mt-8 space-y-4">
+              <span className="text-xxs font-black uppercase tracking-wider text-neutral-500 block mb-1">Choose your approach:</span>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {activeQuest.choices?.map((choice) => {
+                  let icon = "📐";
+                  let typeLabel = "LOGIC";
+                  let colorClass = "bg-[#eff6ff] hover:bg-[#dbeafe] text-blue-900";
+                  if (choice.type === "verbal") {
+                    icon = "🗣️";
+                    typeLabel = "RELATIONAL";
+                    colorClass = "bg-[#fdf2f8] hover:bg-[#fce7f3] text-pink-900";
+                  } else if (choice.type === "practical") {
+                    icon = "🔧";
+                    typeLabel = "PRACTICAL";
+                    colorClass = "bg-[#f0fdf4] hover:bg-[#dcfce7] text-green-900";
+                  }
 
-              <button
-                type="submit"
-                className="w-full rounded-full bg-[var(--neutral-1000)] px-5 py-4 font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] transition-all cursor-pointer active:scale-95 text-sm"
-              >
-                Submit Observation
-              </button>
-            </form>
+                  return (
+                    <button
+                      key={choice.id}
+                      type="button"
+                      onClick={() => handleChoiceClick(choice.id)}
+                      className={`w-full text-left p-4 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer ${colorClass}`}
+                    >
+                      <span className="text-[9px] font-black uppercase tracking-wider block opacity-70 mb-1">
+                        {icon} {typeLabel}
+                      </span>
+                      <h4 className="text-xs font-black uppercase">{choice.text}</h4>
+                      <p className="text-[10px] opacity-90 mt-1 leading-relaxed font-semibold">{choice.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-            <div className="mt-8 rounded-2xl bg-[var(--neutral-50)] p-5 border-2 border-[var(--neutral-300)]">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--neutral-500)]">
+            <div className="mt-8 rounded-2xl bg-[#f7f3e6] p-5 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <p className="text-xxs font-black uppercase tracking-wider text-[var(--neutral-500)]">
                 {companion.name} says
               </p>
-              <p className="mt-2 leading-7 text-[var(--neutral-700)]">{activeQuest.initialSaying}</p>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--neutral-700)] font-extrabold italic">{activeQuest.initialSaying}</p>
             </div>
           </div>
         )}

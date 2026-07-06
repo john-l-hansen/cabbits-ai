@@ -78,6 +78,35 @@ export type JournalEntry = {
   createdAt: string;
   updatedAt: string;
 };
+export interface QuestChoice {
+  id: string;
+  type: "logical" | "verbal" | "practical";
+  text: string;
+  description: string;
+}
 
+export interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  placeholder: string;
+  initialSaying: string;
+  rewardItemId?: string;
+  isLocked: boolean;
+  unlockCondition: string;
+  locationId?: string;
+  poiId?: string;
+  choices?: QuestChoice[];
+  xpReward?: number;
+}
 
+export interface Location {
+  id: string;
+  name: string;
+  description: string;
+  pinEmoji: string;
+  top: string;
+  left: string;
+  questIds: string[];
+}
 

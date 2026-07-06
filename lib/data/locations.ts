@@ -1,12 +1,4 @@
-export interface Location {
-  id: string;
-  name: string;
-  description: string;
-  pinEmoji: string;
-  top: string; // CSS position top
-  left: string; // CSS position left
-  questIds: string[]; // references quest IDs in quests.ts
-}
+import { Location } from "@/types";
 
 export const LOCATIONS: Record<string, Location> = {
   pond: {

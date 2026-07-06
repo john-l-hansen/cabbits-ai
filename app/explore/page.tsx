@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCompanion } from "@/components/providers/CompanionProvider";
-import { Location } from "@/lib/data/locations";
-import { Quest } from "@/lib/data/quests";
+import { Quest, Location } from "@/types";
 import { getLandmarkComment } from "@/lib/agents/dialogue";
 import { useMainShell, useMainShellSidebar } from "@/components/layout/MainShell";
 import { motion } from "framer-motion";
@@ -116,7 +115,7 @@ function ExploreSidebar({ selectedLoc, setSelectedLoc, activeQuestId, setActiveQ
 
   const activeDetails = selectedLoc ? locations[selectedLoc] : null;
   const locationQuests = activeDetails
-    ? activeDetails.questIds.map((id) => quests[id]).filter(Boolean)
+    ? activeDetails.questIds.map((id: string) => quests[id]).filter(Boolean)
     : [];
 
   return (
@@ -128,7 +127,7 @@ function ExploreSidebar({ selectedLoc, setSelectedLoc, activeQuestId, setActiveQ
           <div className="space-y-2">
             {Object.values(locations).map((loc) => {
               const active = selectedLoc === loc.id;
-              const hasReactiveQuest = loc.questIds.some(id => id.startsWith("special_") && !isQuestCompleted(id));
+              const hasReactiveQuest = loc.questIds.some((id: string) => id.startsWith("special_") && !isQuestCompleted(id));
               const displayName = loc.name.replace("Crescent ", "").replace("Green ", "").replace("Pip's ", "");
               
               return (
@@ -183,7 +182,7 @@ function ExploreSidebar({ selectedLoc, setSelectedLoc, activeQuestId, setActiveQ
           </div>
 
           <div className="space-y-2">
-            {locationQuests.map((q) => {
+            {locationQuests.map((q: Quest) => {
               const completed = isQuestCompleted(q.id);
               const locked = evaluateLockStatus(q);
               const active = activeQuestId === q.id;
@@ -223,11 +222,13 @@ function ExploreSidebar({ selectedLoc, setSelectedLoc, activeQuestId, setActiveQ
 }
 
 export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, setActiveQuestId }: ExploreStateProps) {
-  const { companion, isLoading, memories, quests, locations } = useCompanion();
+  const { companion, isLoading, memories, quests, locations, completedQuestIds } = useCompanion();
   const router = useRouter();
 
   // Consume global layout context
   const { weather } = useMainShell();
+
+  const [selectedPoi, setSelectedPoi] = useState<string | null>(null);
 
   // Redirect if companion is not created
   useEffect(() => {
@@ -236,49 +237,26 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
     }
   }, [isLoading, companion, router]);
 
-  // Update selected quest when location changes
+  // Clear selected POI when location changes
   useEffect(() => {
-    if (selectedLoc) {
-      const loc = locations[selectedLoc];
-      if (loc && loc.questIds.length > 0) {
-        const incomplete = loc.questIds.find(id => !isQuestCompleted(id));
-        setActiveQuestId(incomplete || loc.questIds[0]);
-      } else {
-        setActiveQuestId(null);
-      }
-    } else {
-      setActiveQuestId(null);
-    }
-  }, [selectedLoc, locations]);
+    setSelectedPoi(null);
+  }, [selectedLoc]);
 
   if (isLoading || !companion) return null;
 
   const isQuestCompleted = (questId: string) => {
-    return memories.some((m) => {
-      if (m.questId === questId) return true;
-      try {
-        const parsed = JSON.parse(m.content);
-        return parsed.questId === questId;
-      } catch (e) {
-        return false;
-      }
-    });
+    return completedQuestIds.includes(questId);
   };
 
   const evaluateLockStatus = (quest: Quest) => {
     if (!companion) return true;
-    if (!quest.isLocked) return false;
-    if (quest.id === "wise_owl" || quest.id === "tidy_tunnel") {
-      return companion.insightsCount < 1;
-    }
-    if (quest.id === "decipher_rune") {
-      return companion.insightsCount < 2;
-    }
-    return true;
+    return false;
   };
 
   const activeDetails = selectedLoc ? locations[selectedLoc] : null;
-  const activeQuest = activeQuestId ? quests[activeQuestId] : null;
+  const activeQuest = selectedPoi
+    ? Object.values(quests).find((q) => q.locationId === selectedLoc && q.poiId === selectedPoi)
+    : null;
 
   const getObjectives = (qId: string): string[] => {
     const maps: Record<string, string[]> = {
@@ -317,7 +295,7 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
 
           {/* Locations Absolute Pins */}
           {Object.values(locations).map((loc) => {
-            const hasReactiveQuest = loc.questIds.some(id => id.startsWith("special_") && !isQuestCompleted(id));
+            const hasReactiveQuest = loc.questIds.some((id: string) => id.startsWith("special_") && !isQuestCompleted(id));
             const displayName = loc.name.replace("Crescent ", "").replace("Green ", "").replace("Pip's ", "");
             const active = selectedLoc === loc.id;
             
@@ -398,22 +376,30 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
               {locationExtraMetadata[selectedLoc].pointsOfInterest.map((poi, idx) => {
                 const pos = poiPositions[selectedLoc][idx];
                 if (!pos) return null;
+                const poiQuest = Object.values(quests).find(q => q.locationId === selectedLoc && q.poiId === poi);
+                const completed = poiQuest ? isQuestCompleted(poiQuest.id) : false;
+                const active = selectedPoi === poi;
                 return (
-                  <div
+                  <button
                     key={poi}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group z-10"
+                    onClick={() => setSelectedPoi(poi)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group z-10 cursor-pointer"
                     style={{ top: pos.top, left: pos.left }}
                   >
                     {/* Pin Circle */}
-                    <div className="w-8 h-8 rounded-full border-[4px] border-[#181818] bg-white flex items-center justify-center relative shadow-sm transition-all group-hover:scale-110">
-                      <span className="text-xs">📍</span>
+                    <div className={`w-8 h-8 rounded-full border-[4px] border-[#181818] flex items-center justify-center relative shadow-sm transition-all group-hover:scale-110 ${
+                      active ? "bg-black text-white" : completed ? "bg-emerald-100" : "bg-white"
+                    }`}>
+                      <span className="text-xs">{completed ? "✔️" : "📍"}</span>
                     </div>
                     
                     {/* Label Pill */}
-                    <div className="mt-2 px-2.5 py-0.5 font-fredoka font-black text-[9px] uppercase tracking-wider border-2 border-black bg-[#fefdf9] text-[#181818] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] select-none whitespace-nowrap">
+                    <div className={`mt-2 px-2.5 py-0.5 font-fredoka font-black text-[9px] uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] select-none whitespace-nowrap transition-all ${
+                      active ? "bg-black text-[#fefdf9]" : completed ? "bg-emerald-100 text-emerald-900" : "bg-[#fefdf9] text-[#181818]"
+                    }`}>
                       {poi}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </>
@@ -427,7 +413,7 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
                   <div className="flex items-center justify-between">
                     <span className="text-[8px] font-black uppercase tracking-wider text-[var(--neutral-500)]">Active Quest</span>
                     <button
-                      onClick={() => setSelectedLoc(null)}
+                      onClick={() => { setSelectedPoi(null); setSelectedLoc(null); }}
                       className="text-xxs font-extrabold uppercase text-[var(--neutral-400)] hover:text-[var(--neutral-900)] cursor-pointer"
                     >
                       ✕ Close
@@ -504,8 +490,12 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-center p-4">
-                <p className="text-[10px] text-[var(--neutral-500)] italic">No quest selected.</p>
+              <div className="h-full flex flex-col items-center justify-center text-center p-4 gap-3">
+                <span className="text-2xl select-none">📍</span>
+                <p className="text-[10px] font-black text-black uppercase tracking-wider">Select a Landmark</p>
+                <p className="text-[10px] text-[var(--neutral-500)] leading-relaxed max-w-[200px]">
+                  Tap one of the three landmark pins on the map to inspect its active quest!
+                </p>
               </div>
             )}
           </div>

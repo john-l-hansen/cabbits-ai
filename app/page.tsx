@@ -211,7 +211,7 @@ export function HomeContent({
   screenFlash,
   showPing,
 }: HomeContentProps) {
-  const { companion, isLoading, quests, memories, journalEntries } = useCompanion();
+  const { companion, isLoading, quests, memories, journalEntries, showLevelUpAlert, setShowLevelUpAlert } = useCompanion();
   const { weather, setWeather } = useMainShell();
   const router = useRouter();
 
@@ -544,10 +544,56 @@ export function HomeContent({
 
         {/* Full-screen Flash/Fade Overlay */}
         <div 
-        className={`absolute inset-0 bg-[#fefdf9] z-[9999] pointer-events-none transition-opacity duration-250 ${
-          screenFlash ? "opacity-100" : "opacity-0"
-        }`} 
-      />
+          className={`absolute inset-0 bg-[#fefdf9] z-[9999] pointer-events-none transition-opacity duration-250 ${
+            screenFlash ? "opacity-100" : "opacity-0"
+          }`} 
+        />
+
+        {/* Level Up Celebration Clay Modal Overlay */}
+        {showLevelUpAlert && companion && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
+            <div className="w-full max-w-sm bg-white border-4 border-black rounded-[2rem] p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col items-center select-none animate-bounce-in">
+              <span className="text-5xl select-none animate-bounce mb-4">🎉</span>
+              <h2 className="text-2xl font-black text-black uppercase tracking-tight">LEVEL UP!</h2>
+              <p className="text-xxs font-bold text-emerald-600 uppercase tracking-widest mt-1">
+                {companion.name} reached Level {companion.level}!
+              </p>
+              
+              <div className="my-6 w-full rounded-2xl border-4 border-black bg-[#fefdf9] p-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-2.5">
+                <span className="text-[9px] font-black text-neutral-500 uppercase tracking-wider block">Stats Increased:</span>
+                <div className="grid grid-cols-2 gap-3 text-xs font-black uppercase text-neutral-800">
+                  <div className="flex items-center gap-1.5">
+                    <span>❤️ Health:</span>
+                    <span className="text-emerald-600">{companion.health}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span>🧠 Learning:</span>
+                    <span className="text-emerald-600">{companion.learning}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span>🤝 Kindness:</span>
+                    <span className="text-emerald-600">{companion.kindness}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span>⚡ Energy:</span>
+                    <span className="text-emerald-600">{companion.energy}</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-neutral-500 leading-relaxed max-w-[250px] mb-6 font-medium">
+                With higher levels, {companion.name} develops deeper logic capacities and unlocks specialized NPC actions!
+              </p>
+
+              <button
+                onClick={() => setShowLevelUpAlert(false)}
+                className="w-full py-3.5 text-center font-black text-white bg-black hover:bg-neutral-900 transition-all cursor-pointer rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 text-xs uppercase tracking-wider"
+              >
+                Hooray!
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

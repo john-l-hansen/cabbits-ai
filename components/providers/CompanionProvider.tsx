@@ -1,13 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation, Item, DraftObject, JournalEntry } from "@/types";
+import { Companion, CompanionTemperament, CompanionMemory, Book, CompanionMood, CompanionLocation, Item, DraftObject, JournalEntry, Quest, Location } from "@/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { runAgentSimulation } from "@/lib/agents/simulation";
 import { DEFAULT_BOOKS } from "@/lib/data/books";
-import { QUESTS, Quest } from "@/lib/data/quests";
+import { QUESTS, getRandomizedQuestSet } from "@/lib/data/quests";
 import { ITEMS } from "@/lib/data/items";
-import { LOCATIONS, Location } from "@/lib/data/locations";
+import { LOCATIONS } from "@/lib/data/locations";
 
 // Helper function to inject reactive quests based on companion interests
 const injectReactiveQuests = (
@@ -99,8 +99,11 @@ type CompanionContextType = {
   locations: Record<string, Location>;
   draftObjects: DraftObject[];
   journalEntries: JournalEntry[];
+  completedQuestIds: string[];
+  showLevelUpAlert: boolean;
+  setShowLevelUpAlert: (show: boolean) => void;
   createCompanion: (name: string, temperament: CompanionTemperament) => Promise<void>;
-  completeQuest: (userObservation: string, questId?: string) => Promise<void>;
+  completeQuest: (questId: string, choiceId: string) => Promise<void>;
   resetCompanion: () => Promise<void>;
   toggleFavoriteBook: (bookId: string) => Promise<void>;
   updateBookProgress: (bookId: string, progress: number) => Promise<void>;
@@ -144,6 +147,8 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
   const [activeLocations, setActiveLocations] = useState<Record<string, Location>>(LOCATIONS);
   const [draftObjects, setDraftObjects] = useState<DraftObject[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [completedQuestIds, setCompletedQuestIds] = useState<string[]>([]);
+  const [showLevelUpAlert, setShowLevelUpAlert] = useState<boolean>(false);
 
   // Initialize and load state
   useEffect(() => {
@@ -332,6 +337,10 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
           const savedJournal = localStorage.getItem("cabbits_journal_v1");
           if (savedJournal) setJournalEntries(JSON.parse(savedJournal));
 
+          // Load completed quest IDs
+          const savedCompleted = localStorage.getItem("cabbits_completed_quests_list_v1");
+          if (savedCompleted) setCompletedQuestIds(JSON.parse(savedCompleted));
+
           const savedCompanion = localStorage.getItem(COMPANION_STORAGE_KEY);
           const savedQuest = localStorage.getItem(QUEST_STORAGE_KEY);
           const savedMemories = localStorage.getItem(MEMORIES_STORAGE_KEY);
@@ -470,80 +479,122 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const completeQuest = async (userObservation: string, questId: string = "notice_one_thing") => {
+  const completeQuest = async (questId: string, choiceId: string) => {
     if (!companion) return;
 
     setIsQuestCompleted(true);
 
-    // Run the agent simulation pipeline
-    const payload = runAgentSimulation(
-      userObservation,
-      companion.name,
-      companion.temperament
-    );
+    const questData = activeQuests[questId];
+    if (!questData) return;
 
-    setIsQuestCompleted(payload.isSafe);
+    const choice = questData.choices?.find((c) => c.id === choiceId);
 
-    // Calculate curiosity rewards based on rating
-    let points = 15;
-    if (payload.evaluationRating === "Thoughtful") points = 50;
-    else if (payload.evaluationRating === "Developing") points = 30;
+    // Dynamic specialist details based on choice type
+    let specialistFeedback = "";
+    let companionReflection = "";
+    let routedSpecialist = "Generalist";
 
-    let newCuriosity = companion.curiosity + points;
-    let newInsightsCount = companion.insightsCount;
-
-    if (newCuriosity >= 100) {
-      newCuriosity = 0;
-      newInsightsCount += 1;
+    if (choice?.type === "logical") {
+      routedSpecialist = "Logician";
+      specialistFeedback = `Analyzing pattern details: "${choice?.text || ""}" (${choice?.description || ""}). High deductive accuracy. Mathematical logic verified.`;
+      companionReflection = `“Wow, ${companion.name}! Your logical logic checks out perfectly! That makes the calculations so clear and helps me see the pattern.”`;
+    } else if (choice?.type === "verbal") {
+      routedSpecialist = "Linguist & Relational";
+      specialistFeedback = `Analyzing relational details: "${choice?.text || ""}" (${choice?.description || ""}). High empathy and communication index. Language semantics verified.`;
+      companionReflection = `“Your words are so kind and thoughtful, ${companion.name}! Speaking to the forest neighbors and reciting runes makes me feel so happy and warm inside.”`;
+    } else {
+      routedSpecialist = "Practical Craftsman";
+      specialistFeedback = `Analyzing mechanical details: "${choice?.text || ""}" (${choice?.description || ""}). Strong practical execution and scientific observation. Physical mechanics verified.`;
+      companionReflection = `“That was a very practical solution! Fixing the hinges, lashing the wood, and checking the soil really makes a physical difference in our world, ${companion.name}.”`;
     }
 
-    // Quest completions award carrot coins! (+30 coins)
+    // Quest completions award 200 XP
+    const xpReward = questData.xpReward || 200;
     const coinReward = 30;
 
-    // Check if quest awards a collectible item
-    const questData = activeQuests[questId];
-    const rewardItemId = questData?.rewardItemId;
+    let newXP = companion.xp + xpReward;
+    let newLevel = companion.level;
+    let newHealth = companion.health;
+    let newLearning = companion.learning;
+    let newKindness = companion.kindness;
+    let newEnergy = companion.energy;
+    let leveledUp = false;
 
+    // Level-up threshold: Level * 1000
+    const xpNeeded = newLevel * 1000;
+    if (newXP >= xpNeeded) {
+      newXP = newXP - xpNeeded;
+      newLevel += 1;
+      leveledUp = true;
+      // Scale attributes
+      newHealth += Math.floor(Math.random() * 5) + 5; // +5 to +9
+      newLearning += Math.floor(Math.random() * 5) + 5;
+      newKindness += Math.floor(Math.random() * 5) + 5;
+      newEnergy += Math.floor(Math.random() * 5) + 5;
+      setShowLevelUpAlert(true);
+    }
+
+    // Update completed quests list
+    const nextCompletedIds = [...completedQuestIds, questId];
+    setCompletedQuestIds(nextCompletedIds);
+    try {
+      localStorage.setItem("cabbits_completed_quests_list_v1", JSON.stringify(nextCompletedIds));
+    } catch (e) {
+      console.error("Local save failed for completed list:", e);
+    }
+
+    // Set Completion & Randomization logic
+    const locationId = questData.locationId;
+    const locationQuestIds = {
+      pond: ["pond_lilies", "pond_ripples", "pond_grove"],
+      meadow: ["meadow_buttercups", "meadow_clover", "meadow_hummingbird"],
+      forest: ["forest_oak", "forest_perch", "forest_undergrowth"],
+      burrow: ["burrow_entrance", "burrow_lichen", "burrow_tunnels"],
+      library: ["library_ivy", "library_shelves", "library_tablet"]
+    }[locationId || ""];
+
+    let finalQuests = { ...activeQuests };
+    let finalCompletedIds = [...nextCompletedIds];
+
+    if (locationQuestIds && locationQuestIds.every(id => finalCompletedIds.includes(id))) {
+      // Clear completed flags for this location's quests
+      finalCompletedIds = finalCompletedIds.filter(id => !locationQuestIds.includes(id));
+      setCompletedQuestIds(finalCompletedIds);
+      try {
+        localStorage.setItem("cabbits_completed_quests_list_v1", JSON.stringify(finalCompletedIds));
+      } catch (e) {
+        console.error("Local save failed for completed list:", e);
+      }
+
+      // Generate a new randomized quest set for this location
+      const newSet = getRandomizedQuestSet(locationId || "", companion.name);
+      finalQuests = { ...activeQuests, ...newSet };
+      setActiveQuests(finalQuests);
+      try {
+        localStorage.setItem("cabbits_approved_quests_v1", JSON.stringify(finalQuests));
+      } catch (e) {
+        console.error("Local save failed for active quests:", e);
+      }
+    }
+
+    // Check if quest awards a collectible item
+    const rewardItemId = questData.rewardItemId;
     let newInventory = [...companion.inventory];
     if (rewardItemId && !newInventory.includes(rewardItemId)) {
       newInventory.push(rewardItemId);
     }
 
-    const obsLower = userObservation.toLowerCase();
-    const nextInterests = { ...(companion.interests || {}) };
-
-    let matchedTopic: "mushroom" | "space" | "bug" | null = null;
-    if (obsLower.includes("mushroom") || obsLower.includes("fungus") || obsLower.includes("toadstool") || obsLower.includes("spore")) {
-      nextInterests.mushroom = (nextInterests.mushroom || 0) + 1;
-      matchedTopic = "mushroom";
-    } else if (obsLower.includes("star") || obsLower.includes("telescope") || obsLower.includes("sky") || obsLower.includes("moon") || obsLower.includes("constellation")) {
-      nextInterests.space = (nextInterests.space || 0) + 1;
-      matchedTopic = "space";
-    } else if (obsLower.includes("bug") || obsLower.includes("insect") || obsLower.includes("butterfly") || obsLower.includes("firefly") || obsLower.includes("beetle")) {
-      nextInterests.bug = (nextInterests.bug || 0) + 1;
-      matchedTopic = "bug";
-    }
-
-    const { newQuests, newLocations } = injectReactiveQuests(nextInterests, activeQuests, activeLocations);
-    setActiveQuests(newQuests);
-    setActiveLocations(newLocations);
-
-    // Save dynamic approved registers to local storage
-    try {
-      localStorage.setItem("cabbits_approved_quests_v1", JSON.stringify(newQuests));
-      localStorage.setItem("cabbits_approved_locations_v1", JSON.stringify(newLocations));
-    } catch (e) {
-      console.error("Local save failed for active collections:", e);
-    }
-
     const updatedCompanion: Companion = {
       ...companion,
-      curiosity: newCuriosity,
-      insightsCount: newInsightsCount,
+      level: newLevel,
+      xp: newXP,
+      health: newHealth,
+      learning: newLearning,
+      kindness: newKindness,
+      energy: newEnergy,
       carrotCoins: companion.carrotCoins + coinReward,
       cabbitMood: "happy",
       inventory: newInventory,
-      interests: nextInterests,
     };
 
     setCompanion(updatedCompanion);
@@ -551,13 +602,13 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     const memoryId = generateUUID();
     const createdAt = new Date().toISOString();
     const contentJson = JSON.stringify({
-      userObservation: userObservation.trim(),
-      routedSpecialist: payload.routedSpecialist,
-      specialistFeedback: payload.specialistFeedback,
-      evaluationRating: payload.evaluationRating,
-      evaluationFeedback: payload.evaluationFeedback,
-      companionReflection: payload.companionReflection,
-      curiosityEarned: points,
+      userObservation: choice ? `${choice.text}: ${choice.description}` : "Observed location landmarks.",
+      routedSpecialist,
+      specialistFeedback,
+      evaluationRating: "Thoughtful",
+      evaluationFeedback: "Problem-solving option selected.",
+      companionReflection,
+      curiosityEarned: 20,
       questId,
     });
 
@@ -572,184 +623,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
     const updatedMemories = [newMemory, ...memories];
     setMemories(updatedMemories);
 
-    // Proposal Generator logic (propose draft item/quest)
-    let proposedType: "item" | "quest" | null = null;
-    let proposedObjectId = "";
-    let proposedData: any = null;
-
-    if (questId === "watch_ripples") {
-      proposedType = "item";
-      proposedObjectId = "moonlit_pearl";
-      proposedData = {
-        item: {
-          id: "moonlit_pearl",
-          name: "Moonlit Pearl",
-          description: "A glowing white pearl found deep in the silt of Crescent Pond. Pip imagined this because of your water observations.",
-          icon: "🔮",
-          type: "collectible",
-          locationOrigin: "Crescent Pond"
-        },
-        quest: {
-          id: "pearl_hunt",
-          title: "Seek the Moonlit Pearl",
-          description: "Dive deep into the glowing silt of Crescent Pond to locate the mythical pearl Pip dreamed of.",
-          placeholder: "I searched the sandy bottom of the pond near the lily pads and found the glowing sphere...",
-          initialSaying: "“The pearl is down there! Let's search the glowing silt together.”",
-          rewardItemId: "moonlit_pearl",
-          isLocked: false,
-          unlockCondition: "",
-          locationId: "pond"
-        },
-        pipReason: `I imagined a glowing pearl hidden in the pond mud because of how you noticed the raindrop ripples expanding, ${companion.name}!`
-      };
-    } else if (questId === "count_flowers") {
-      proposedType = "item";
-      proposedObjectId = "clover_nectar";
-      proposedData = {
-        item: {
-          id: "clover_nectar",
-          name: "Clover Nectar",
-          description: "A vial of sweet nectar collected from clover blooms. Pip imagined this because of your wildflower counting.",
-          icon: "🧪",
-          type: "collectible",
-          locationOrigin: "Green Meadow"
-        },
-        quest: {
-          id: "nectar_brew",
-          title: "Harvest the Clover Nectar",
-          description: "Help Pip squeeze the sweetest clover blooms in Green Meadow to distill a tiny vial of glowing nectar.",
-          placeholder: "I selected five blooming purple clovers and carefully extracted the sweet nectar drop by drop...",
-          initialSaying: "“Let's distill the clover blooms! Careful not to spill any drops.”",
-          rewardItemId: "clover_nectar",
-          isLocked: false,
-          unlockCondition: "",
-          locationId: "meadow"
-        },
-        pipReason: "I dreamed of gathering sweet nectar because of your beautiful observation counting the wildflower clusters in the field!"
-      };
-    } else if (questId === "notice_one_thing") {
-      proposedType = "item";
-      proposedObjectId = "mossy_bark";
-      proposedData = {
-        item: {
-          id: "mossy_bark",
-          name: "Mossy Bark",
-          description: "A chunk of ancient oak bark thick with glowing green moss. Pip imagined this because of your acorn study.",
-          icon: "🪵",
-          type: "collectible",
-          locationOrigin: "Oak Forest"
-        },
-        quest: {
-          id: "bark_rubbing",
-          title: "Study the Mossy Bark",
-          description: "Take a charcoal rubbing of the ancient patterns engraved in the mossy oak bark of the Wise Owl's tree.",
-          placeholder: "I held the parchment tight against the bark and shaded the ancient spiral grooves with charcoal...",
-          initialSaying: "“The bark has ancient spirals! Let's take a charcoal rubbing together.”",
-          rewardItemId: "mossy_bark",
-          isLocked: false,
-          unlockCondition: "",
-          locationId: "forest"
-        },
-        pipReason: "I imagined copying ancient symbols from the tree bark because of your wonderful study of the hidden acorn stash!"
-      };
-    }
-
-    let nextDrafts = [...draftObjects];
-
-    if (proposedType && proposedObjectId && proposedData) {
-      const alreadyProposed = draftObjects.some((d) => d.objectId === proposedObjectId) || 
-                              newInventory.includes(proposedObjectId);
-
-      if (!alreadyProposed) {
-        const draftId = generateUUID();
-        const draftCreatedAt = new Date().toISOString();
-        const newDraft: DraftObject = {
-          id: draftId,
-          companionId: companion.id,
-          type: proposedType,
-          objectId: proposedObjectId,
-          data: proposedData,
-          status: "draft",
-          createdAt: draftCreatedAt
-        };
-
-        nextDrafts = [newDraft, ...draftObjects];
-        setDraftObjects(nextDrafts);
-
-        try {
-          localStorage.setItem("cabbits_drafts_v1", JSON.stringify(nextDrafts));
-        } catch (e) {
-          console.error("Local save failed for drafts:", e);
-        }
-      }
-    }
-
-    // Memory Synthesis Compiler
-    let synthTopic = "";
-    let synthSummary = "";
-    let synthIcon = "";
-
-    if (questId === "watch_ripples") {
-      synthTopic = "Water Circles";
-      synthSummary = "We studied how concentric ripples expand when raindrops hit Crescent Pond. Large drops transfer more kinetic energy, producing faster-traveling wave rings!";
-      synthIcon = "💧";
-    } else if (questId === "count_flowers") {
-      synthTopic = "Meadow Flora";
-      synthSummary = "We counted yellow buttercups clustered together in Green Meadow. They organize in clusters to optimize solar capture and share root resources.";
-      synthIcon = "🌸";
-    } else if (questId === "notice_one_thing") {
-      synthTopic = "Acorn Stashes";
-      synthSummary = "We searched the leaf litter under the ancient Oak tree. Acorn caches placed by squirrels near roots help oak saplings spread and take root.";
-      synthIcon = "🐿️";
-    } else if (questId === "pearl_hunt") {
-      synthTopic = "Moonlit Minerals";
-      synthSummary = "We recovered a glowing white pearl from the pond silt. Its luminescence comes from natural minerals absorbing twilight rays.";
-      synthIcon = "🔮";
-    } else if (questId === "nectar_brew") {
-      synthTopic = "Distilled Elixirs";
-      synthSummary = "We distilled clover blooms in the meadow. Condensing organic sugars preserves their nutritional value and stores energy.";
-      synthIcon = "🧪";
-    } else if (questId === "bark_rubbing") {
-      synthTopic = "Tree Carvings";
-      synthSummary = "We traced the spiral engravings on the ancient oak tree bark. These markings are records of changes or guideposts for travelers.";
-      synthIcon = "🪵";
-    }
-
-    let updatedJournal = [...journalEntries];
-    if (synthTopic && synthSummary && synthIcon) {
-      const existingIdx = journalEntries.findIndex((j) => j.topic === synthTopic);
-      const nowIso = new Date().toISOString();
-      
-      if (existingIdx > -1) {
-        const updatedEntry = {
-          ...journalEntries[existingIdx],
-          summary: synthSummary,
-          updatedAt: nowIso
-        };
-        updatedJournal[existingIdx] = updatedEntry;
-      } else {
-        const newEntry: JournalEntry = {
-          id: generateUUID(),
-          companionId: companion.id,
-          topic: synthTopic,
-          summary: synthSummary,
-          icon: synthIcon,
-          createdAt: nowIso,
-          updatedAt: nowIso
-        };
-        updatedJournal = [newEntry, ...journalEntries];
-      }
-
-      setJournalEntries(updatedJournal);
-
-      try {
-        localStorage.setItem("cabbits_journal_v1", JSON.stringify(updatedJournal));
-      } catch (e) {
-        console.error("Local save failed for journal:", e);
-      }
-    }
-
-    // Local Storage Cache
+    // Save dynamic approved registers to local storage
     try {
       localStorage.setItem(COMPANION_STORAGE_KEY, JSON.stringify(updatedCompanion));
       localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(true));
@@ -764,11 +638,14 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         await supabase
           .from("companions")
           .update({
-            curiosity: newCuriosity,
-            insights_count: newInsightsCount,
+            level: newLevel,
+            xp: newXP,
+            health: newHealth,
+            learning: newLearning,
+            kindness: newKindness,
+            energy: newEnergy,
             carrot_coins: companion.carrotCoins + coinReward,
             cabbit_mood: "happy",
-            interests: nextInterests,
           })
           .eq("id", companion.id);
 
@@ -785,36 +662,6 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
             companion_id: companion.id,
             item_id: rewardItemId,
           });
-        }
-
-        // Insert new draft to DB if spawned
-        const newlyCreatedDraft = nextDrafts.find((d) => d.objectId === proposedObjectId && d.status === "draft");
-        if (newlyCreatedDraft) {
-          await supabase.from("companion_draft_objects").insert({
-            id: newlyCreatedDraft.id,
-            companion_id: companion.id,
-            type: newlyCreatedDraft.type,
-            object_id: newlyCreatedDraft.objectId,
-            data: newlyCreatedDraft.data,
-            status: "draft",
-            created_at: newlyCreatedDraft.createdAt
-          });
-        }
-
-        // Insert/Upsert synthesized journal to DB
-        if (synthTopic && synthSummary && synthIcon) {
-          const entry = updatedJournal.find((j) => j.topic === synthTopic);
-          if (entry) {
-            await supabase.from("companion_journal").upsert({
-              id: entry.id,
-              companion_id: companion.id,
-              topic: entry.topic,
-              summary: entry.summary,
-              icon: entry.icon,
-              created_at: entry.createdAt,
-              updated_at: entry.updatedAt
-            }, { onConflict: "companion_id,topic" });
-          }
         }
       } catch (error) {
         console.error("Failed database connection:", error);
@@ -1222,6 +1069,9 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
         locations: activeLocations,
         draftObjects,
         journalEntries,
+        completedQuestIds,
+        showLevelUpAlert,
+        setShowLevelUpAlert,
         createCompanion,
         completeQuest,
         resetCompanion,
