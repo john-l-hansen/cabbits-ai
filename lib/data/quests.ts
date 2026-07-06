@@ -4,10 +4,10 @@ import { Quest } from "@/types";
 const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) => Quest> = {
   pond_lilies: (vars) => ({
     id: "pond_lilies",
-    title: "Sort the Lilies",
-    description: `A cluster of ${vars.count} floating water lilies is clogging the channel near Crescent Pond. Choose how to help Pip manage them.`,
+    title: "Unlocking the Blue Dome Door",
+    description: `Help Pip inspect the decorative blue front door of the grass-dome house, checking the lock tumbler and the ${vars.count} round brass rivets.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“These lilies are beautiful but they grow so fast, ${vars.name}. Let's find a way to group them!”`,
+    initialSaying: `“This round blue door is locked shut. Let's see if we can find a way to open it, ${vars.name}!”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
@@ -17,29 +17,29 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
       {
         id: "logic",
         type: "logical",
-        text: "Group by Prime Numbers",
-        description: `Count the petals on each pad and divide the ${vars.count} lilies into exact mathematical sets.`
+        text: "Solve the Keyhole Puzzle",
+        description: "Analyze the pin configuration inside the brass lock to match the tumbler grooves."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Recite the Lily Poem",
-        description: "Speak a gentle forest rhyme to encourage the lily spirits to shift and let water flow."
+        text: "Knock and Call for Moss",
+        description: "Knock gently on the round wooden door and ask if anyone is home in a friendly voice."
       },
       {
         id: "practical",
         type: "practical",
-        text: "Clear Channel Debris",
-        description: "Carefully untangle the lily roots and clear away dry reeds that block the stream."
+        text: "Oil the Door Handle",
+        description: "Apply natural oil to the rusty brass handle and check the door alignment."
       }
     ]
   }),
   pond_ripples: (vars) => ({
     id: "pond_ripples",
-    title: "Analyze the Ripples",
-    description: `A rain shower has started, sending ${vars.count} concentric wave rings across the pond. Investigate their motion.`,
+    title: "Examine the Floating Lily Pads",
+    description: `Observe the green lily pads floating on the pond surface, counting ${vars.count} ripples surrounding them.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“Water is like a moving mirror, ${vars.name}. Look at how the waves travel!”`,
+    initialSaying: `“Look at how the lily pads float so peacefully, ${vars.name}! What should we check?”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
@@ -49,29 +49,29 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
       {
         id: "logic",
         type: "logical",
-        text: "Calculate Wave Frequencies",
-        description: "Measure the distance between the ripples to find the mathematical pattern of their expansion."
+        text: "Measure Concentric Circles",
+        description: "Calculate the distance and mathematical intervals between each expanding ripple ring."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Echo the Wave Song",
-        description: "Sing a soft humming tune that matches the rhythm of the drops hitting the water."
+        text: "Sing a Song to the Water",
+        description: "Compose a short, soft poem about the peaceful reflections on the water's surface."
       },
       {
         id: "practical",
         type: "practical",
-        text: "Measure Float Displacements",
-        description: "Drop a floating leaf into the center and observe how the kinetic wave rings push it outwards."
+        text: "Retrieve a Floating Leaf",
+        description: "Use a long wooden branch to pull a loose lily pad closer to inspect its underside."
       }
     ]
   }),
   pond_grove: (vars) => ({
     id: "pond_grove",
-    title: "Clear the East Grove Path",
-    description: `A group of ${vars.count} fallen birch branches is blocking the walkway into the East Grove.`,
+    title: "Inspect the Wooden Garden Bench",
+    description: `Check the wooden bench on the forest path, checking for loose wood slats and verifying the stability of its ${vars.count} support frames.`,
     placeholder: "Select your approach below to begin.",
-    initialSaying: `“Oh dear, the path is completely blocked. How should we clear it, ${vars.name}?”`,
+    initialSaying: `“This bench is a perfect spot to sit and rest. Let's make sure it's stable, ${vars.name}!”`,
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
@@ -81,20 +81,20 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
       {
         id: "logic",
         type: "logical",
-        text: "Sort and Stack by Length",
-        description: "Sort the branches by length and stack them in geometric piles to optimize space."
+        text: "Analyze Bench Load Balance",
+        description: "Check if the bench legs are level on the dirt path and calculate load stability."
       },
       {
         id: "verbal",
         type: "verbal",
-        text: "Ask for Beaver Aid",
-        description: "Speak with the friendly forest beaver nearby and ask politely if he can help move the heavy logs."
+        text: "Carve a Friend Greeting",
+        description: "Inscribe a tiny smiley face or welcoming traveler marker into the armrest."
       },
       {
         id: "practical",
         type: "practical",
-        text: "Use Leverage Action",
-        description: "Find a long sturdy oak limb and use it as a lever to pry the largest blockages off the path."
+        text: "Tighten the Frame Screws",
+        description: "Use a screwdriver to tighten the loose wood screws on the backrest."
       }
     ]
   }),
