@@ -411,10 +411,10 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
               <div className="flex flex-col h-full justify-between gap-4">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-black uppercase tracking-wider text-[var(--neutral-500)]">Active Quest</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--neutral-500)]">Active Quest</span>
                     <button
                       onClick={() => { setSelectedPoi(null); setSelectedLoc(null); }}
-                      className="text-xxs font-extrabold uppercase text-[var(--neutral-400)] hover:text-[var(--neutral-900)] cursor-pointer"
+                      className="text-xs font-extrabold uppercase text-[var(--neutral-400)] hover:text-[var(--neutral-900)] cursor-pointer"
                     >
                       ✕ Close
                     </button>
@@ -422,20 +422,20 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
 
                   <div>
                     <div className="flex flex-wrap gap-2">
-                      <span className={`rounded-full text-white text-[9px] font-black px-2.5 py-0.5 uppercase tracking-wider inline-block ${
+                      <span className={`rounded-full text-white text-[10px] font-black px-2.5 py-0.5 uppercase tracking-wider inline-block ${
                         isQuestCompleted(activeQuest.id) ? "bg-black border-2 border-black" : evaluateLockStatus(activeQuest) ? "bg-neutral-400 border-2 border-neutral-400" : "bg-black border-2 border-black"
                       }`}>
                         {isQuestCompleted(activeQuest.id) ? "COMPLETED" : evaluateLockStatus(activeQuest) ? "LOCKED" : "AVAILABLE"}
                       </span>
                       {activeQuest.id.startsWith("special_") && (
-                        <span className="rounded-full border border-dashed border-amber-500 text-amber-700 text-[9px] font-black px-2.5 py-0.5 uppercase tracking-wider inline-block bg-amber-50/20">
+                        <span className="rounded-full border border-dashed border-amber-500 text-amber-700 text-[10px] font-black px-2.5 py-0.5 uppercase tracking-wider inline-block bg-amber-50/20">
                           ✨ REACTIVE ✨
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xs font-black text-black leading-snug uppercase mt-2">{activeQuest.title}</h3>
-                    <span className="text-[9px] text-[var(--neutral-500)] font-medium mt-0.5 block">
-                      Landmark: {activeDetails.name}
+                    <h3 className="text-base font-black text-black leading-snug uppercase mt-2">{activeQuest.title}</h3>
+                    <span className="text-[11px] text-[var(--neutral-500)] font-semibold mt-0.5 block">
+                      Landmark: {activeDetails?.name || activeQuest.poiId}
                     </span>
                   </div>
 
@@ -443,19 +443,19 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
 
                   {/* Description */}
                   <div>
-                    <span className="text-[8px] font-black uppercase tracking-wider text-[var(--neutral-500)] block mb-1">Description</span>
-                    <p className="text-[10px] leading-relaxed text-[var(--neutral-700)]">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--neutral-500)] block mb-1">Description</span>
+                    <p className="text-[12px] leading-relaxed text-[var(--neutral-700)] font-semibold">
                       {activeQuest.description}
                     </p>
                   </div>
 
                   {/* Objectives */}
                   <div className="space-y-2">
-                    <span className="text-[8px] font-black uppercase tracking-wider text-[var(--neutral-500)] block mb-1">Objectives</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--neutral-500)] block mb-1">Objectives</span>
                     <div className="space-y-1.5">
                       {getObjectives(activeQuest.id).map((obj, i) => (
-                        <div key={i} className="flex gap-2 items-center text-[10px] font-semibold text-[var(--neutral-700)]">
-                          <span className="text-[9px] text-[var(--neutral-400)]">○</span>
+                        <div key={i} className="flex gap-2 items-center text-[12px] font-semibold text-[var(--neutral-700)]">
+                          <span className="text-xs text-[var(--neutral-400)]">○</span>
                           <span className="truncate">{obj}</span>
                         </div>
                       ))}
@@ -468,21 +468,17 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
                   
                   {/* Action button */}
                   {isQuestCompleted(activeQuest.id) ? (
-                    <div className="w-full chunky-panel bg-[var(--neutral-100)] py-3 text-center font-black text-[var(--neutral-500)] text-xxs border-dashed border-black/45 shadow-none select-none uppercase">
+                    <div className="w-full chunky-panel bg-[var(--neutral-100)] py-3 text-center font-black text-[var(--neutral-500)] text-xs border-dashed border-black/45 shadow-none select-none uppercase">
                       Quest Completed ✔️
                     </div>
                   ) : evaluateLockStatus(activeQuest) ? (
-                    <div className="w-full chunky-panel bg-[var(--neutral-100)] py-3.5 text-center font-black text-[var(--neutral-500)] text-xxs border-dashed border-black/45 shadow-none select-none uppercase">
+                    <div className="w-full chunky-panel bg-[var(--neutral-100)] py-3.5 text-center font-black text-[var(--neutral-500)] text-xs border-dashed border-black/45 shadow-none select-none uppercase">
                       🔒 {activeQuest.unlockCondition}
                     </div>
                   ) : (
                     <button
                       onClick={() => router.push(`/quest?questId=${activeQuest.id}`)}
-                      className={`w-full py-3 text-xxs font-black uppercase tracking-wider transition-all cursor-pointer chunky-button ${
-                        activeQuest.id.startsWith("special_") 
-                          ? "bg-amber-600 hover:bg-amber-700 text-white border-black" 
-                          : "bg-black hover:bg-neutral-900 text-white"
-                      }`}
+                      className={`w-full py-3.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer chunky-button !bg-black hover:!bg-neutral-900 !text-white`}
                     >
                       Begin Quest →
                     </button>
@@ -492,8 +488,8 @@ export function ExploreContent({ selectedLoc, setSelectedLoc, activeQuestId, set
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-4 gap-3">
                 <span className="text-2xl select-none">📍</span>
-                <p className="text-[10px] font-black text-black uppercase tracking-wider">Select a Landmark</p>
-                <p className="text-[10px] text-[var(--neutral-500)] leading-relaxed max-w-[200px]">
+                <p className="text-xs font-black text-black uppercase tracking-wider">Select a Landmark</p>
+                <p className="text-xs text-[var(--neutral-500)] leading-relaxed max-w-[200px]">
                   Tap one of the three landmark pins on the map to inspect its active quest!
                 </p>
               </div>
