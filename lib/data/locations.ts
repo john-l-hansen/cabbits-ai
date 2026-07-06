@@ -8,7 +8,7 @@ export const LOCATIONS: Record<string, Location> = {
     pinEmoji: "🌧️",
     top: "17.5%",
     left: "36.8%",
-    questIds: ["watch_ripples"],
+    questIds: ["pond_lilies", "pond_ripples", "pond_grove"],
   },
   meadow: {
     id: "meadow",
@@ -17,7 +17,7 @@ export const LOCATIONS: Record<string, Location> = {
     pinEmoji: "🌸",
     top: "19.0%",
     left: "85.4%",
-    questIds: ["count_flowers"],
+    questIds: ["meadow_buttercups", "meadow_clover", "meadow_hummingbird"],
   },
   forest: {
     id: "forest",
@@ -26,7 +26,7 @@ export const LOCATIONS: Record<string, Location> = {
     pinEmoji: "🌳",
     top: "52.0%",
     left: "62.3%",
-    questIds: ["notice_one_thing", "wise_owl"],
+    questIds: ["forest_oak", "forest_perch", "forest_undergrowth"],
   },
   burrow: {
     id: "burrow",
@@ -35,7 +35,7 @@ export const LOCATIONS: Record<string, Location> = {
     pinEmoji: "🏡",
     top: "77.0%",
     left: "36.8%",
-    questIds: ["tidy_tunnel"],
+    questIds: ["burrow_entrance", "burrow_lichen", "burrow_tunnels"],
   },
   library: {
     id: "library",
@@ -44,6 +44,6 @@ export const LOCATIONS: Record<string, Location> = {
     pinEmoji: "🏛️",
     top: "82.0%",
     left: "86.5%",
-    questIds: ["decipher_rune"],
+    questIds: ["library_ivy", "library_shelves", "library_tablet"],
   },
 };

@@ -283,7 +283,7 @@ export function CompanionProvider({ children }: { children: React.ReactNode }) {
                 setMemories(mappedMemories);
                 
                 // Determine first quest completion based on memories
-                const hasFirstQuestMemory = mappedMemories.some((m) => m.questId === "notice_one_thing");
+                const hasFirstQuestMemory = mappedMemories.length > 0;
                 setIsQuestCompleted(hasFirstQuestMemory);
               }
 
