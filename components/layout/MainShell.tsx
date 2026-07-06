@@ -223,6 +223,13 @@ export function MainShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeSheet, showMailbox, showSettings, pathname, router]);
 
+  // Redirect to login if not loading and no companion exists
+  useEffect(() => {
+    if (!isLoading && !companion) {
+      router.replace("/login");
+    }
+  }, [isLoading, companion, router]);
+
   // Support opening profile slideover on load if URL has sheet=profile
   useEffect(() => {
     if (typeof window !== "undefined") {
