@@ -15,7 +15,7 @@ const locationExtraMetadata: Record<string, {
   items: string[];
 }> = {
   pond: {
-    pointsOfInterest: ["Golden Lilies", "Center Ripples", "East Grove"],
+    pointsOfInterest: ["Blue Dome Door", "Lily Pads", "Garden Bench"],
     characters: ["Moss (Cabbit)", "Elder Frog"],
     items: ["Swan Feather"],
   },
@@ -30,7 +30,7 @@ const locationExtraMetadata: Record<string, {
     items: ["Silver Acorn", "Old Feather"],
   },
   burrow: {
-    pointsOfInterest: ["Warm Lantern Entrance", "Lichen Storage Shelf", "Comfortable Tunnels"],
+    pointsOfInterest: ["Music Alcove", "Storage Shelf", "Living Room TV"],
     characters: ["Pip (Cabbit)"],
     items: ["Sweet Carrot", "Glowing Lichen Jar"],
   },

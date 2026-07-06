@@ -11,7 +11,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
-    poiId: "Golden Lilies",
+    poiId: "Blue Dome Door",
     xpReward: 200,
     choices: [
       {
@@ -43,7 +43,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
-    poiId: "Center Ripples",
+    poiId: "Lily Pads",
     xpReward: 200,
     choices: [
       {
@@ -75,7 +75,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "pond",
-    poiId: "East Grove",
+    poiId: "Garden Bench",
     xpReward: 200,
     choices: [
       {
@@ -299,7 +299,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "burrow",
-    poiId: "Warm Lantern Entrance",
+    poiId: "Music Alcove",
     xpReward: 200,
     choices: [
       {
@@ -331,7 +331,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "burrow",
-    poiId: "Lichen Storage Shelf",
+    poiId: "Storage Shelf",
     xpReward: 200,
     choices: [
       {
@@ -363,7 +363,7 @@ const QUEST_TEMPLATES: Record<string, (vars: { count: number; name: string }) =>
     isLocked: false,
     unlockCondition: "",
     locationId: "burrow",
-    poiId: "Comfortable Tunnels",
+    poiId: "Living Room TV",
     xpReward: 200,
     choices: [
       {
