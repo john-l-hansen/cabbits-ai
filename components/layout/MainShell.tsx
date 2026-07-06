@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useCompanion } from "@/components/providers/CompanionProvider";
@@ -127,6 +127,53 @@ export function MainShell({ children }: { children: React.ReactNode }) {
   const [readLetters, setReadLetters] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedLetter, setSelectedLetter] = useState<any>(null);
+
+  const [isMusicEnabled, setIsMusicEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize persistent HTML5 ambient audio player
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.25; // low background volume
+      }
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  // Update track selection depending on page location (reactivity)
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    let targetSrc = "/assets/K02-06.mp3"; // Cozy room theme
+    if (pathname === "/explore" || pathname === "/quest") {
+      targetSrc = "/assets/ravenshadow-audio.mp3"; // Active exploration theme
+    }
+    
+    const currentSrc = audioRef.current.src;
+    if (!currentSrc.endsWith(targetSrc)) {
+      audioRef.current.src = targetSrc;
+      if (isMusicEnabled) {
+        audioRef.current.play().catch(err => console.log("Autoplay blocked:", err));
+      }
+    }
+  }, [pathname, isMusicEnabled]);
+
+  // Handle manual playback toggle
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isMusicEnabled) {
+      audioRef.current.play().catch(err => console.log("Playback blocked by browser:", err));
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isMusicEnabled]);
 
   // Drawer inner states
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
@@ -319,7 +366,12 @@ export function MainShell({ children }: { children: React.ReactNode }) {
                   
                   <label className="flex items-center justify-between text-xs text-[var(--neutral-700)] cursor-pointer hover:bg-[var(--neutral-55)] p-1.5 rounded-md select-none">
                     <span>Cozy Ambient Music</span>
-                    <input type="checkbox" defaultChecked className="accent-[var(--neutral-1000)] cursor-pointer" />
+                    <input
+                      type="checkbox"
+                      checked={isMusicEnabled}
+                      onChange={(e) => setIsMusicEnabled(e.target.checked)}
+                      className="accent-[var(--neutral-1000)] cursor-pointer"
+                    />
                   </label>
                   <label className="flex items-center justify-between text-xs text-[var(--neutral-700)] cursor-pointer hover:bg-[var(--neutral-55)] p-1.5 rounded-md select-none">
                     <span>Show Blueprint Grid</span>
