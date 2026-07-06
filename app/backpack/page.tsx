@@ -277,7 +277,7 @@ export function BackpackContent({ activeCategory, setActiveCategory, sortOption,
       initial={{ filter: "blur(16px)", scale: 0.97 }}
       animate={{ filter: "blur(0px)", scale: 1 }}
       transition={{ type: "spring", stiffness: 85, damping: 16 }}
-      className="flex-1 bg-[var(--neutral-50)] p-8 flex gap-6 overflow-y-auto h-full w-full relative"
+      className="flex-1 bg-[#6b503c] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] p-8 flex gap-6 overflow-y-auto h-full w-full relative"
     >
       {/* Main Area Content */}
       <div className="flex-1 flex flex-col gap-6 min-w-0 z-10">
