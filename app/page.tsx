@@ -147,12 +147,7 @@ function HomeSidebar() {
   const getEnergyBar = (filled: number) => "█".repeat(filled) + "░".repeat(4 - filled);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9, x: -20 }}
-      animate={{ opacity: 1, scale: 1, x: 0 }}
-      transition={{ type: "spring", stiffness: 120, damping: 14, delay: 0.2 }}
-      className="space-y-6 text-left"
-    >
+    <div className="space-y-6 text-left">
       <div className="space-y-3">
         <span className="text-[10px] font-black uppercase tracking-wider text-[var(--neutral-500)] block">
           Home
@@ -171,7 +166,7 @@ function HomeSidebar() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
