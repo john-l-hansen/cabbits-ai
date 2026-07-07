@@ -402,7 +402,7 @@ export function HomeContent({
               if (setWeather) setWeather(cycle[nextIdx]);
             }}
             className="hitbox-overlay z-20"
-            style={{ left: "50.1%", top: "30.1%", width: "8.0%", height: "14.1%" }}
+            style={{ left: "53.5%", top: "27.5%", width: "5.5%", height: "12.0%" }}
             title="Calendar"
           />
           {/* Bookshelf Hitbox */}
@@ -517,12 +517,10 @@ export function HomeContent({
 
                 <div className="isometric-billboard-sprite size-full flex items-center justify-center relative">
 
-                  {/* Pixel Pip character asset */}
                   <motion.div
-                    onClick={handleCabbitClick}
                     whileHover={{ y: -6, scaleY: 1.05, rotate: 1 }}
                     transition={{ type: "spring", stiffness: 400, damping: 12 }}
-                    className="cursor-pointer flex flex-col items-center select-none"
+                    className="flex flex-col items-center select-none"
                   >
                     <motion.div
                       key={`${pipTile.x}-${pipTile.y}-${isHopping}`}
@@ -548,20 +546,42 @@ export function HomeContent({
                         className={showMainModel ? "w-[240px] h-[240px] relative flex items-center justify-center" : "w-14 h-16 relative flex items-center justify-center"}
                       >
                         {showMainModel ? (
-                          <div className={companion.cabbitMood === "sleeping" ? "rotate-[-70deg] translate-x-[-10px] translate-y-[20px] scale-[0.8]" : ""}>
-                            <div className="cabbit-sprite-idle w-[240px] h-[240px] bg-contain bg-center bg-no-repeat" />
-                          </div>
+                          <>
+                            <div className={companion.cabbitMood === "sleeping" ? "rotate-[-70deg] translate-x-[-10px] translate-y-[20px] scale-[0.8]" : ""}>
+                              <div className="cabbit-sprite-idle w-[240px] h-[240px] bg-contain bg-center bg-no-repeat" />
+                            </div>
+                            {/* Padded, dynamic hitbox overlay covering the Cabbit in standing or sleeping modes */}
+                            <div 
+                              onClick={handleCabbitClick}
+                              className="hitbox-overlay absolute z-30 cursor-pointer"
+                              style={{
+                                width: companion.cabbitMood === "sleeping" ? "190px" : "150px",
+                                height: companion.cabbitMood === "sleeping" ? "130px" : "190px",
+                                top: companion.cabbitMood === "sleeping" ? "80px" : "25px",
+                                left: companion.cabbitMood === "sleeping" ? "15px" : "45px",
+                                borderRadius: "32px",
+                              }}
+                              title={companion.name}
+                            />
+                          </>
                         ) : (
-                          <img 
-                            src={getPipSprite()} 
-                            alt="Pip" 
-                            className="w-full h-full object-contain pixelated pointer-events-none" 
-                            style={{ imageRendering: "pixelated" }}
-                          />
+                          <>
+                            <img 
+                              src={getPipSprite()} 
+                              alt="Pip" 
+                              className="w-full h-full object-contain pixelated pointer-events-none" 
+                              style={{ imageRendering: "pixelated" }}
+                            />
+                            <div 
+                              onClick={handleCabbitClick}
+                              className="hitbox-overlay absolute inset-0 z-30 cursor-pointer"
+                              style={{ borderRadius: "12px" }}
+                              title={companion.name}
+                            />
+                          </>
                         )}
                       </motion.div>
                     </motion.div>
-
                   </motion.div>
 
                 </div>
