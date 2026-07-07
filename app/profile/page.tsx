@@ -79,13 +79,15 @@ function ProfileContent() {
       transition={{ type: "spring", stiffness: 85, damping: 16 }}
       className="flex h-full w-full relative overflow-hidden bg-[#9ecae0]"
     >
-      {/* Background Clouds */}
-      <div className="absolute top-10 left-10 text-6xl opacity-70">☁️</div>
-      <div className="absolute top-20 left-1/3 text-4xl opacity-70">☁️</div>
-      <div className="absolute top-12 right-1/4 text-5xl opacity-70">☁️</div>
+      {/* Profile Background Image */}
+      <img 
+        src="/assets/profile-bg.png" 
+        alt="Profile Background" 
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+      />
 
-      {/* Center Stage: Cabbit on Island */}
-      <div className="flex-1 flex flex-col items-center justify-end pb-12 relative z-10 translate-x-[40px]">
+      {/* Center Stage: Cabbit on Island (Centered vertically) */}
+      <div className="flex-1 flex flex-col items-center justify-center pt-16 relative z-10 translate-x-[40px]">
         <div className="relative flex items-center justify-center -mb-32">
           <motion.div
             initial={{ y: -20 }}
