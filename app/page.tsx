@@ -585,21 +585,7 @@ export function HomeContent({
           </div>
         </motion.div>
 
-        {/* FLOATING DAILY QUEST CARD (Pinned to Top-Right of view) */}
-        {activeQuest && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 12, delay: 0.35 }}
-            className="absolute right-8 top-8 w-[180px] chunky-panel p-4 flex flex-col gap-2 pointer-events-none select-none z-25 bg-white"
-          >
-            <span className="text-[9px] font-black uppercase tracking-wider text-[var(--neutral-500)]">Active Tracker</span>
-            <h5 className="text-xxs font-extrabold text-[var(--neutral-900)] truncate mt-0.5">{activeQuest.title}</h5>
-            <div className="h-2 bg-[var(--neutral-200)] border border-black rounded-none overflow-hidden w-full">
-              <div className="h-full bg-[var(--neutral-1000)]" style={{ width: `${questProgress}%` }} />
-            </div>
-          </motion.div>
-        )}
+
 
         {/* Full-screen Flash/Fade Overlay */}
         <div 
