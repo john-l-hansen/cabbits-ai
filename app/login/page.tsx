@@ -175,9 +175,10 @@ export default function LoginPage() {
   const { companion, createCompanion, isLoading } = useCompanion();
   const router = useRouter();
 
-  const [step, setStep] = useState<"splash" | "returning" | "creation" | "keepsake-reveal" | "welcome">("splash");
+  const [step, setStep] = useState<"splash" | "returning" | "signup" | "creation" | "keepsake-reveal" | "welcome">("splash");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
@@ -203,6 +204,30 @@ export default function LoginPage() {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
+    localStorage.setItem("cabbits_user", JSON.stringify({ email: email.trim() }));
+    
+    if (companion) {
+      setStep("welcome");
+    } else {
+      setStep("creation");
+    }
+  };
+
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
     setError("");
@@ -300,7 +325,10 @@ export default function LoginPage() {
 
             <div className="w-full space-y-4 max-w-sm mb-4">
               <button
-                onClick={() => setStep("creation")}
+                onClick={() => {
+                  setError("");
+                  setStep("signup");
+                }}
                 className="w-full rounded-full bg-[var(--neutral-1000)] py-4 font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] active:scale-97 transition-all text-sm cursor-pointer"
               >
                 Begin Your Journey →
@@ -395,8 +423,101 @@ export default function LoginPage() {
 
             <p className="text-center text-xs text-[var(--neutral-500)] mt-8">
               New to Cabbits?{" "}
-              <span onClick={() => setStep("creation")} className="font-bold text-[var(--neutral-900)] underline cursor-pointer">
+              <span onClick={() => {
+                setError("");
+                setStep("signup");
+              }} className="font-bold text-[var(--neutral-900)] underline cursor-pointer">
                 Create an account
+              </span>
+            </p>
+          </section>
+        )}
+
+        {/* STEP 2B: EMAIL SIGN UP (login-signup) */}
+        {step === "signup" && (
+          <section className="rounded-[2.5rem] border-2 border-[var(--neutral-1000)] bg-[var(--neutral-0)] p-8 shadow-sm animate-scale-up">
+            <button
+              onClick={() => setStep("splash")}
+              className="text-xs font-bold text-[var(--neutral-500)] hover:text-[var(--neutral-900)] mb-6 inline-block"
+            >
+              ← Back
+            </button>
+
+            <div className="text-center space-y-2 mb-8">
+              <div className="border-2 border-[var(--neutral-1000)] bg-[var(--neutral-50)] px-4 py-1.5 rounded-full inline-block font-extrabold uppercase tracking-widest text-[var(--neutral-900)] text-xs">
+                Join the Adventure!
+              </div>
+              <h2 className="text-2xl font-bold text-[var(--neutral-900)]">Create an explorer account</h2>
+            </div>
+
+            <form onSubmit={handleSignUp} className="space-y-5">
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-500)]">Email Address</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] px-4 py-3.5 outline-none focus:border-[var(--neutral-1000)] transition-all text-sm text-[var(--neutral-900)]"
+                  placeholder="explorer@valley.com"
+                  required
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-500)]">Password</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] px-4 py-3.5 outline-none focus:border-[var(--neutral-1000)] transition-all text-sm text-[var(--neutral-900)]"
+                  placeholder="At least 6 characters"
+                  required
+                  minLength={6}
+                />
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--neutral-500)]">Confirm Password</span>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full rounded-2xl border-2 border-[var(--neutral-300)] bg-[var(--neutral-0)] px-4 py-3.5 outline-none focus:border-[var(--neutral-1000)] transition-all text-sm text-[var(--neutral-900)]"
+                  placeholder="Repeat your password"
+                  required
+                />
+              </label>
+
+              {error && <p className="text-xs text-red-500 font-semibold">{error}</p>}
+
+              <button
+                type="submit"
+                className="w-full rounded-full bg-[var(--neutral-1000)] py-4 font-bold text-white shadow-sm hover:bg-[var(--neutral-900)] transition-all text-sm cursor-pointer mt-4"
+              >
+                Sign Up & Customize
+              </button>
+            </form>
+
+            <div className="my-6 flex items-center justify-between gap-4">
+              <hr className="w-full border-[var(--neutral-200)]" />
+              <span className="text-xs font-bold text-[var(--neutral-400)] uppercase">or</span>
+              <hr className="w-full border-[var(--neutral-200)]" />
+            </div>
+
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full rounded-full border-2 border-[var(--neutral-300)] py-3.5 font-bold text-[var(--neutral-700)] hover:bg-[var(--neutral-50)] hover:border-[var(--neutral-1000)] transition-all text-xs cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>🌐</span> Continue with Google
+            </button>
+
+            <p className="text-center text-xs text-[var(--neutral-500)] mt-8">
+              Already have an account?{" "}
+              <span onClick={() => {
+                setError("");
+                setStep("returning");
+              }} className="font-bold text-[var(--neutral-900)] underline cursor-pointer">
+                Sign in
               </span>
             </p>
           </section>
