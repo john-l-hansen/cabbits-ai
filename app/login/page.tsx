@@ -327,8 +327,12 @@ export default function LoginPage() {
               <p className="text-xs font-semibold text-[var(--neutral-500)] uppercase tracking-wider">A cozy learning adventure</p>
             </div>
 
-            <div className="my-6 w-48 h-48 flex items-center justify-center select-none animate-float">
-              <CabbitVectorPreview earStyle="pointy" eyeStyle="wide" furColor="cream" />
+            <div className="my-6 w-48 h-48 rounded-[2rem] border-4 border-black bg-[#eae4d3] flex items-center justify-center overflow-hidden relative select-none animate-float shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <img 
+                src="/assets/cabbit-idle-01.png" 
+                alt="Cabbit" 
+                className="w-full h-full object-contain scale-[1.3] origin-center" 
+              />
             </div>
 
             <div className="w-full space-y-4 max-w-sm mb-4">
