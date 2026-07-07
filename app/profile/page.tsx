@@ -172,15 +172,13 @@ function ProfileContent() {
                 ))}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-4 space-y-4">
-                <div className="w-[240px] h-[240px] rounded-2xl border-4 border-black shadow-[4px_4px_0px_black] overflow-hidden bg-white">
-                  <img 
-                    src="/assets/bag-coming-soon.png" 
-                    alt="Equipment Coming Soon" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="text-[10px] leading-relaxed text-[var(--neutral-500)] font-black max-w-[200px] uppercase tracking-wider">
+              <div className="h-full flex flex-col items-center justify-center text-center p-2 space-y-4">
+                <img 
+                  src="/assets/bag-coming-soon.png" 
+                  alt="Equipment Coming Soon" 
+                  className="w-[360px] h-[360px] object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.15)]"
+                />
+                <p className="text-[10px] leading-relaxed text-[var(--neutral-500)] font-black max-w-[240px] uppercase tracking-wider">
                   Collect equipment on your adventures to customize Pip's gear!
                 </p>
               </div>
