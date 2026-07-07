@@ -308,8 +308,14 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--neutral-200)] px-6 py-8 flex justify-center items-center font-sans">
-      <div className="mx-auto w-full max-w-lg">
+    <main 
+      className="min-h-screen px-6 py-8 flex justify-center items-center font-sans bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/assets/login_bg.jpg')" }}
+    >
+      {/* Soft overlay to make the chunky card interface stand out cleanly */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[3px]" />
+
+      <div className="mx-auto w-full max-w-lg relative z-10">
         
         {/* STEP 1: SPLASH SCREEN (login-splash) */}
         {step === "splash" && (
