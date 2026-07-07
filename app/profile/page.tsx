@@ -88,7 +88,7 @@ function ProfileContent() {
 
       {/* Center Stage: Cabbit on Island (Centered vertically) */}
       <div className="flex-1 flex flex-col items-center justify-center pt-16 relative z-10 translate-x-[40px]">
-        <div className="relative flex items-center justify-center -mb-32">
+        <div className="relative flex items-center justify-center -mb-[200px] z-20">
           <motion.div
             initial={{ y: -20 }}
             animate={{ y: 0 }}
@@ -97,13 +97,11 @@ function ProfileContent() {
           />
         </div>
         {/* Island Base */}
-        <div className="w-[580px] h-[180px] bg-[#6ab04c] border-b-[24px] border-[#a07b50] rounded-[50%] shadow-[0_12px_0_rgba(0,0,0,0.2)] relative z-10 flex items-center justify-center">
-           <div className="absolute inset-2 border-2 border-[#badc58] rounded-[50%] opacity-50"></div>
-           <span className="absolute left-12 top-8 text-3xl">🌿</span>
-           <span className="absolute right-16 bottom-8 text-2xl">🌼</span>
-        </div>
-        {/* Background Bushes behind island */}
-        <div className="absolute bottom-0 w-full h-[300px] bg-gradient-to-t from-[#5a9c3c] to-transparent opacity-20 pointer-events-none z-0"></div>
+        <img 
+          src="/assets/profile-island.png?v=1" 
+          alt="Island Stage" 
+          className="w-[640px] h-auto object-contain relative z-10 select-none pointer-events-none"
+        />
       </div>
 
       {/* Right Sidebar: Equipment Panel */}
