@@ -90,20 +90,20 @@ function ProfileContent() {
       <div className="absolute top-12 right-1/4 text-5xl opacity-70">☁️</div>
 
       {/* Center Stage: Cabbit on Island */}
-      <div className="flex-1 flex flex-col items-center justify-end pb-12 relative z-10">
-        <div className="relative flex items-center justify-center -mb-24">
+      <div className="flex-1 flex flex-col items-center justify-end pb-12 relative z-10 translate-x-[40px]">
+        <div className="relative flex items-center justify-center -mb-32">
           <motion.div
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="cabbit-sprite-idle w-[300px] h-[300px] bg-contain bg-center bg-no-repeat relative z-20 drop-shadow-xl"
+            className="cabbit-sprite-idle w-[380px] h-[380px] bg-contain bg-center bg-no-repeat relative z-20 drop-shadow-xl"
           />
         </div>
         {/* Island Base */}
-        <div className="w-[500px] h-[160px] bg-[#6ab04c] border-b-[24px] border-[#a07b50] rounded-[50%] shadow-[0_12px_0_rgba(0,0,0,0.2)] relative z-10 flex items-center justify-center">
+        <div className="w-[580px] h-[180px] bg-[#6ab04c] border-b-[24px] border-[#a07b50] rounded-[50%] shadow-[0_12px_0_rgba(0,0,0,0.2)] relative z-10 flex items-center justify-center">
            <div className="absolute inset-2 border-2 border-[#badc58] rounded-[50%] opacity-50"></div>
-           <span className="absolute left-10 top-6 text-3xl">🌿</span>
-           <span className="absolute right-12 bottom-6 text-2xl">🌼</span>
+           <span className="absolute left-12 top-8 text-3xl">🌿</span>
+           <span className="absolute right-16 bottom-8 text-2xl">🌼</span>
         </div>
         {/* Background Bushes behind island */}
         <div className="absolute bottom-0 w-full h-[300px] bg-gradient-to-t from-[#5a9c3c] to-transparent opacity-20 pointer-events-none z-0"></div>
@@ -167,14 +167,24 @@ function ProfileContent() {
           </div>
 
           <div className="flex-1 overflow-y-auto pt-2 pb-4">
-            <div className="grid grid-cols-2 gap-3">
-              {equipmentItems.map(item => (
-                <div key={item.id} className="chunky-panel bg-white p-3 flex flex-col items-center justify-center text-center gap-2 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_black] transition-all">
-                  <div className="text-4xl drop-shadow-md">{item.icon}</div>
-                  <span className="text-xs font-black text-[var(--neutral-900)] leading-tight">{item.name}</span>
-                </div>
-              ))}
-            </div>
+            {equipmentItems.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3">
+                {equipmentItems.map(item => (
+                  <div key={item.id} className="chunky-panel bg-white p-3 flex flex-col items-center justify-center text-center gap-2 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_black] transition-all">
+                    <div className="text-4xl drop-shadow-md">{item.icon}</div>
+                    <span className="text-xs font-black text-[var(--neutral-900)] leading-tight">{item.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 border-4 border-dashed border-black/20 rounded-2xl space-y-3 bg-white/40">
+                <span className="text-4xl">⚔️</span>
+                <h3 className="text-sm font-black text-black">Coming Soon</h3>
+                <p className="text-[10px] leading-relaxed text-[var(--neutral-500)] font-bold max-w-[200px]">
+                  Collect equipment on your adventures to customize Pip's gear!
+                </p>
+              </div>
+            )}
           </div>
           
           {/* Pagination Placeholder */}
