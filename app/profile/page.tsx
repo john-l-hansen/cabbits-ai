@@ -68,14 +68,9 @@ function ProfileSidebar() {
 }
 
 function ProfileContent() {
-  const { companion, items } = useCompanion();
-  const [activeTab, setActiveTab] = useState<"all" | "weapon" | "armor" | "accessory" | "star">("all");
+  const { companion } = useCompanion();
 
   if (!companion) return null;
-
-  const equipmentItems = companion.inventory
-    .map(id => items[id])
-    .filter((item): item is Item => !!item && item.type === "equipment");
 
   return (
     <motion.div
@@ -127,69 +122,13 @@ function ProfileContent() {
             </button>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setActiveTab("all")}
-              className={`px-4 py-1.5 rounded-full font-black text-xs border-2 border-black transition-all ${activeTab === "all" ? "bg-[#4A6FA5] text-white shadow-[2px_2px_0px_black]" : "bg-white text-black hover:bg-neutral-100"}`}
-            >
-              All
-            </button>
-            <button 
-              onClick={() => setActiveTab("weapon")}
-              className={`px-3 py-1.5 rounded-full font-black text-xs border-2 border-black transition-all ${activeTab === "weapon" ? "bg-[#4A6FA5] text-white shadow-[2px_2px_0px_black]" : "bg-white text-black hover:bg-neutral-100"}`}
-            >
-              🗡️
-            </button>
-            <button 
-              onClick={() => setActiveTab("armor")}
-              className={`px-3 py-1.5 rounded-full font-black text-xs border-2 border-black transition-all ${activeTab === "armor" ? "bg-[#4A6FA5] text-white shadow-[2px_2px_0px_black]" : "bg-white text-black hover:bg-neutral-100"}`}
-            >
-              👕
-            </button>
-            <button 
-              onClick={() => setActiveTab("accessory")}
-              className={`px-3 py-1.5 rounded-full font-black text-xs border-2 border-black transition-all ${activeTab === "accessory" ? "bg-[#4A6FA5] text-white shadow-[2px_2px_0px_black]" : "bg-white text-black hover:bg-neutral-100"}`}
-            >
-              💍
-            </button>
-            <button 
-              onClick={() => setActiveTab("star")}
-              className={`px-3 py-1.5 rounded-full font-black text-xs border-2 border-black transition-all ${activeTab === "star" ? "bg-[#4A6FA5] text-white shadow-[2px_2px_0px_black]" : "bg-white text-black hover:bg-neutral-100"}`}
-            >
-              ⭐
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto pt-2 pb-4">
-            {equipmentItems.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                {equipmentItems.map(item => (
-                  <div key={item.id} className="chunky-panel bg-white p-3 flex flex-col items-center justify-center text-center gap-2 cursor-pointer hover:-translate-y-1 hover:shadow-[6px_6px_0px_black] transition-all">
-                    <div className="text-4xl drop-shadow-md">{item.icon}</div>
-                    <span className="text-xs font-black text-[var(--neutral-900)] leading-tight">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-2 space-y-4">
-                <img 
-                  src="/assets/bag-coming-soon.png" 
-                  alt="Equipment Coming Soon" 
-                  className="w-[360px] h-[360px] object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.15)]"
-                />
-                <p className="text-[10px] leading-relaxed text-[var(--neutral-500)] font-black max-w-[240px] uppercase tracking-wider">
-                  Collect equipment on your adventures to customize Pip's gear!
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Pagination Placeholder */}
-          <div className="pt-2 flex items-center justify-between font-black text-[var(--neutral-500)] text-xs border-t border-[var(--neutral-300)]">
-            <span className="cursor-pointer hover:text-black">{"<"}</span>
-            <span>1 / 2</span>
-            <span className="cursor-pointer hover:text-black">{">"}</span>
+          {/* Centered Bag Illustration */}
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <img 
+              src="/assets/bag-coming-soon.png" 
+              alt="Equipment Coming Soon" 
+              className="w-[360px] h-[360px] object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.15)]"
+            />
           </div>
 
         </div>
