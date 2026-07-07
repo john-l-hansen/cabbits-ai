@@ -163,8 +163,12 @@ export function MainShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!audioRef.current) return;
     
-    let targetSrc = "/assets/theme.mp3"; // Cozy room theme (default)
-    if (pathname === "/explore" || pathname === "/quest") {
+    let targetSrc: string | null = null;
+    
+    // Explicitly defined pages
+    if (pathname === "/" || pathname === "/login" || pathname === "/companion/new") {
+      targetSrc = "/assets/theme.mp3";
+    } else if (pathname === "/explore" || pathname === "/quest") {
       if (activeZone === "meadow") {
         targetSrc = "/assets/little-bridge.mp3";
       } else if (activeZone === "forest") {
@@ -180,11 +184,14 @@ export function MainShell({ children }: { children: React.ReactNode }) {
       }
     }
     
-    const currentSrc = audioRef.current.src;
-    if (!currentSrc.endsWith(targetSrc)) {
-      audioRef.current.src = targetSrc;
-      if (isMusicEnabled) {
-        audioRef.current.play().catch(err => console.log("Autoplay blocked:", err));
+    // If targetSrc is defined for the page, update source. Otherwise, persist the last track.
+    if (targetSrc) {
+      const currentSrc = audioRef.current.src;
+      if (!currentSrc.endsWith(targetSrc)) {
+        audioRef.current.src = targetSrc;
+        if (isMusicEnabled) {
+          audioRef.current.play().catch(err => console.log("Autoplay blocked:", err));
+        }
       }
     }
   }, [pathname, activeZone, isMusicEnabled]);
