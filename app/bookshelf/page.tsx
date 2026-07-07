@@ -427,7 +427,7 @@ function BookshelfSidebar({
           <button
             onClick={() => setActiveCategory("all")}
             className={`w-full flex items-center justify-between p-3 cursor-pointer transition-all chunky-button ${
-              activeCategory === "all" ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
+              activeCategory === "all" ? "!bg-black !text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
             }`}
           >
             <span>All Books</span>
@@ -438,7 +438,7 @@ function BookshelfSidebar({
           <button
             onClick={() => setActiveCategory("stories")}
             className={`w-full flex items-center justify-between p-3 cursor-pointer transition-all chunky-button ${
-              activeCategory === "stories" ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
+              activeCategory === "stories" ? "!bg-black !text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
             }`}
           >
             <span>Stories</span>
@@ -449,7 +449,7 @@ function BookshelfSidebar({
           <button
             onClick={() => setActiveCategory("guides")}
             className={`w-full flex items-center justify-between p-3 cursor-pointer transition-all chunky-button ${
-              activeCategory === "guides" ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
+              activeCategory === "guides" ? "!bg-black !text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
             }`}
           >
             <span>Field Guides</span>
@@ -460,7 +460,7 @@ function BookshelfSidebar({
           <button
             onClick={() => setActiveCategory("poetry")}
             className={`w-full flex items-center justify-between p-3 cursor-pointer transition-all chunky-button ${
-              activeCategory === "poetry" ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
+              activeCategory === "poetry" ? "!bg-black !text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
             }`}
           >
             <span>Poetry</span>
@@ -471,7 +471,7 @@ function BookshelfSidebar({
           <button
             onClick={() => setActiveCategory("puzzles")}
             className={`w-full flex items-center justify-between p-3 cursor-pointer transition-all chunky-button ${
-              activeCategory === "puzzles" ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
+              activeCategory === "puzzles" ? "!bg-black !text-white shadow-none translate-x-[2px] translate-y-[2px]" : ""
             }`}
           >
             <span>Puzzles</span>
