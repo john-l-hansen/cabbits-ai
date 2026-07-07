@@ -860,13 +860,18 @@ export default function Home() {
   };
 
   const handleCabbitClick = () => {
-    setIsBubbleOpen(true);
-    setZoomTarget("cabbit");
-    if (companion && companion.cabbitMood === "sleeping") {
-      setBubbleText("Zzz... Pip is sleeping peacefully.");
-      return;
+    if (zoomTarget === "cabbit") {
+      setIsBubbleOpen(false);
+      setZoomTarget(null);
+    } else {
+      setIsBubbleOpen(true);
+      setZoomTarget("cabbit");
+      if (companion && companion.cabbitMood === "sleeping") {
+        setBubbleText("Zzz... Pip is sleeping peacefully.");
+        return;
+      }
+      setBubbleText("Pip is happy to be here with you!");
     }
-    setBubbleText("Pip is happy to be here with you!");
   };
 
   // Sync Pip tile with sleeping state on load/change
