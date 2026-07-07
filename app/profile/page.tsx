@@ -81,7 +81,7 @@ function ProfileContent() {
     >
       {/* Profile Background Image */}
       <img 
-        src="/assets/profile-bg.png" 
+        src="/assets/profile-bg.png?v=1" 
         alt="Profile Background" 
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
       />
