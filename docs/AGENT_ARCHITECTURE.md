@@ -1,7 +1,17 @@
 # Agent Architecture
 
 ## Intended Pattern
-User → Companion Agent → Orchestrator → Specialist Agents → Tools / Memory
+
+```mermaid
+graph TD
+    User([User]) -->|Inputs Observation / Answer| Companion[Companion Agent (User-Facing)]
+    Companion -->|Intent & Metadata| Orchestrator[Orchestrator Agent]
+    Orchestrator -->|Delegates Subject| Teacher[Teacher / Specialist Agents (Botany, Physics, History)]
+    Teacher -->|Extracts Insights| Evaluator[Evaluator Agent]
+    Evaluator -->|Reviews Depth| Safety[Safety Agent (Guardrails)]
+    Safety -->|Verifies Compliance| DB[(Supabase Database / Local Memory)]
+    DB -->|Updates State| Companion
+```
 
 ## Agent Types
 - Companion Agent: user-facing relationship
