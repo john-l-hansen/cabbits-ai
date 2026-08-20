@@ -277,3 +277,10 @@ div[class*="bg-[#fefdf9]"] {
   box-shadow: 0 12px 28px rgba(74, 46, 27, 0.08), 
               0 4px 12px rgba(74, 46, 27, 0.04) !important;
 }
+
+/* Hide Next.js Development Indicators / Watermarks */
+next-dev-portal,
+#next-dev-portal,
+#next-route-announcer {
+  display: none !important;
+}
