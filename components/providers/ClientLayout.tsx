@@ -6,7 +6,7 @@ import { MainShell } from "@/components/layout/MainShell";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noShellRoutes = ["/login", "/companion/new", "/quest"];
+  const noShellRoutes = ["/login", "/companion/new", "/quest", "/design-system"];
   const isNoShell = noShellRoutes.some(route => pathname.startsWith(route));
 
   if (isNoShell) {
