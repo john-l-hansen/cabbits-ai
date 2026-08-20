@@ -341,7 +341,7 @@ export default function LoginPage() {
                   setError("");
                   setStep("signup");
                 }}
-                className="w-full chunky-button bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer"
+                className="w-full chunky-button !bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer"
               >
                 Begin Your Journey →
               </button>
@@ -414,7 +414,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full chunky-button bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer mt-4"
+                className="w-full chunky-button !bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer mt-4"
               >
                 Sign In
               </button>
@@ -504,7 +504,7 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full chunky-button bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer mt-4"
+                className="w-full chunky-button !bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer mt-4"
               >
                 Sign Up & Customize
               </button>
@@ -675,7 +675,7 @@ export default function LoginPage() {
                 <div className="pt-2 space-y-2">
                   <button
                     type="submit"
-                    className="w-full chunky-button bg-[#4A6FA5] !text-white py-3.5 font-bold transition-all text-xs cursor-pointer"
+                    className="w-full chunky-button !bg-[#4A6FA5] !text-white py-3.5 font-bold transition-all text-xs cursor-pointer"
                   >
                     Confirm & Start Exploring →
                   </button>
@@ -782,7 +782,7 @@ export default function LoginPage() {
                 <div className="pt-6 space-y-2">
                   <button
                     onClick={() => setStep("welcome")}
-                    className="w-full chunky-button bg-[#4A6FA5] !text-white py-3.5 font-bold transition-all text-xs cursor-pointer"
+                    className="w-full chunky-button !bg-[#4A6FA5] !text-white py-3.5 font-bold transition-all text-xs cursor-pointer"
                   >
                     Start Exploring →
                   </button>
@@ -835,7 +835,7 @@ export default function LoginPage() {
             <div className="w-full space-y-2 max-w-sm mt-2">
               <button
                 onClick={() => router.replace("/")}
-                className="w-full chunky-button bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer"
+                className="w-full chunky-button !bg-[#4A6FA5] !text-white py-4 font-bold transition-all text-sm cursor-pointer"
               >
                 Start Exploring →
               </button>

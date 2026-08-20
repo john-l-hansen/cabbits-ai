@@ -240,8 +240,8 @@ body {
 
 /* 5. Tactile Clay Buttons */
 .chunky-button {
-  background-color: #ffffff !important;
-  color: #4a2e1b !important;
+  background-color: #ffffff;
+  color: #4a2e1b;
   border: 1.5px solid rgba(74, 46, 27, 0.15) !important;
   box-shadow: 0 6px 14px rgba(74, 46, 27, 0.08) !important;
   border-radius: 16px !important;
