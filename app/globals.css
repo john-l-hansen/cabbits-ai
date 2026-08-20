@@ -284,3 +284,77 @@ next-dev-portal,
 #next-route-announcer {
   display: none !important;
 }
+
+/* 6. Cabbits Custom Style Guide Tokens */
+:root {
+  --cab-cream-50: #FFF9ED;
+  --cab-cream-100: #FFF1D6;
+  --cab-cream-200: #F7DFAE;
+  --cab-honey-300: #EFA43B;
+  --cab-caramel-500: #B9691E;
+  --cab-cocoa-700: #442515;
+  --cab-cocoa-500: #754728;
+  --cab-leaf-300: #A8C94B;
+  --cab-leaf-500: #6E9B24;
+  --cab-sky-300: #9CC9E7;
+  --cab-sky-500: #609DCC;
+  --cab-sky-700: #356B9A;
+  --cab-sun-500: #F5A61B;
+  --cab-carrot-400: #FF9B3D;
+  --cab-coral-500: #F56C3A;
+
+  --cab-radius-card: 28px;
+  --cab-radius-pill: 999px;
+  --cab-shadow-soft: 0 5px 14px rgba(115, 70, 26, .12);
+  --cab-shadow-resting: 0 10px 24px rgba(115, 70, 26, .16);
+  --cab-ease-settle: cubic-bezier(.22, .9, .3, 1.15);
+}
+
+.cab-canvas {
+  background-color: var(--cab-cream-100);
+  border-radius: 36px;
+  padding: 24px;
+}
+
+.cab-card {
+  background-color: var(--cab-cream-50);
+  border-radius: var(--cab-radius-card);
+  box-shadow: var(--cab-shadow-soft);
+  border: 1.5px solid var(--cab-cream-200);
+  transition: all 0.2s var(--cab-ease-settle);
+}
+
+.cab-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cab-shadow-resting);
+}
+
+.cab-bubble {
+  background-color: var(--cab-cream-50);
+  border-radius: 24px;
+  box-shadow: var(--cab-shadow-soft);
+  padding: 16px 20px;
+  position: relative;
+}
+
+.cab-badge {
+  background-color: var(--cab-coral-500);
+  color: white;
+  font-weight: 800;
+  border-radius: var(--cab-radius-pill);
+  box-shadow: 0 2px 6px rgba(115, 70, 26, 0.15);
+}
+
+.cab-button {
+  border-radius: 20px;
+  box-shadow: var(--cab-shadow-soft);
+  transition: all 0.15s var(--cab-ease-settle);
+}
+.cab-button:hover {
+  transform: translateY(-1.5px);
+  box-shadow: var(--cab-shadow-resting);
+}
+.cab-button:active {
+  transform: translateY(1.5px);
+  box-shadow: 0 2px 6px rgba(115, 70, 26, 0.08);
+}
