@@ -189,6 +189,7 @@ export default function LoginPage() {
   const [eyeStyle, setEyeStyle] = useState<"wide" | "sleepy" | "sparkle">("wide");
   const [furColor, setFurColor] = useState<"cream" | "tan" | "rust" | "sage" | "dusk" | "midnight">("cream");
   const [keepsake, setKeepsake] = useState("");
+  const [customizerTab, setCustomizerTab] = useState<"ears" | "face" | "outfit">("ears");
 
   useEffect(() => {
     // If user is already authenticated and has a companion, skip login
@@ -537,158 +538,274 @@ export default function LoginPage() {
 
         {/* STEP 3: CHARACTER CUSTOMIZATION (character-creation) */}
         {step === "creation" && (
-          <section className="chunky-panel bg-[#f5f2eb] p-6 animate-scale-up max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
+          <section className="chunky-panel bg-[#FFF9ED] border-2 border-[#F7DFAE] p-5 shadow-resting max-w-md mx-auto rounded-[32px] overflow-hidden flex flex-col gap-5">
+            {/* Header row */}
+            <div className="flex items-center justify-between">
               <button
                 onClick={() => setStep("splash")}
-                className="text-xs font-black text-[var(--neutral-500)] hover:text-black cursor-pointer"
+                className="w-10 h-10 rounded-full border-2 border-black/10 bg-white flex items-center justify-center text-sm font-black cursor-pointer hover:bg-neutral-50 transition-all shadow-sm"
               >
-                ← Back
+                ←
               </button>
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Customizer</span>
+              <h2 className="text-lg font-black text-[#442515] font-fredoka">Make your Cabbit</h2>
+              <div className="flex items-center gap-1.5 bg-white border-2 border-black/10 px-3 py-1.5 rounded-full text-xs font-black text-[#442515] shadow-sm">
+                <span>🪙</span>
+                <span>128</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-              {/* Left Column: Preview area */}
-              <div className="md:col-span-2 flex flex-col items-center justify-center p-4 border-2 border-black/10 rounded-2xl bg-white/70 text-center min-h-[250px] shadow-inner">
-                <h4 className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)] mb-4">Preview</h4>
-                <CabbitVectorPreview earStyle={earStyle} eyeStyle={eyeStyle} furColor={furColor} />
-                <p className="text-[10px] text-[var(--neutral-500)] font-bold mt-3">Updates as you customize</p>
+            {/* Stage / Preview Area */}
+            <div className="relative w-full h-64 rounded-[24px] border-2 border-black/5 bg-[#FFF1D6] flex flex-col items-center justify-center overflow-hidden shadow-inner">
+              {/* Cozy Room Background Items (Simulated Clay Props) */}
+              <div className="absolute inset-0 pointer-events-none select-none opacity-20">
+                <div className="absolute top-4 left-4 text-3xl">🪴</div>
+                <div className="absolute bottom-4 left-4 text-3xl">🪟</div>
+                <div className="absolute top-4 right-4 text-3xl">📚</div>
+                <div className="absolute bottom-4 right-4 text-3xl">🪵</div>
               </div>
 
-              {/* Right Column: Controls area */}
-              <form onSubmit={handleConfirmCustomization} className="md:col-span-3 space-y-5">
-                <h3 className="text-lg font-black text-[var(--neutral-900)]">Create Your Cabbit</h3>
-                
-                {/* Cabbit Name */}
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Cabbit Name</span>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      if (e.target.value.trim()) setError("");
-                    }}
-                    className="rounded-xl border-2 border-black/10 bg-white/70 px-3.5 py-2.5 outline-none focus:border-[#4A6FA5] transition-all text-xs text-[var(--neutral-900)] font-medium shadow-inner"
-                    placeholder="e.g. Pip, Mochi, Sprout..."
-                    maxLength={15}
-                  />
-                </label>
+              {/* Scalloped Rug representation under the Cabbit */}
+              <div className="absolute bottom-6 w-44 h-12 bg-[#9CC9E7] rounded-full opacity-70 blur-[1px] transform scale-y-50 flex items-center justify-center border-2 border-dashed border-[#356B9A]/30" />
 
-                {/* Ear Style */}
-                <div className="space-y-1.5">
-                  <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Ear Style</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(["floppy", "pointy", "round"] as const).map((style) => (
-                      <button
-                        key={style}
-                        type="button"
-                        onClick={() => setEarStyle(style)}
-                        className={`py-2.5 text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
-                          earStyle === style
-                            ? "chunky-button bg-[#4A6FA5] !text-white"
-                            : "chunky-button bg-white text-[var(--neutral-700)]"
-                        }`}
-                      >
-                        {style}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Eye Style */}
-                <div className="space-y-1.5">
-                  <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Eye Style</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(["wide", "sleepy", "sparkle"] as const).map((style) => (
-                      <button
-                        key={style}
-                        type="button"
-                        onClick={() => setEyeStyle(style)}
-                        className={`py-2.5 text-xs font-bold uppercase tracking-wide transition-all cursor-pointer ${
-                          eyeStyle === style
-                            ? "chunky-button bg-[#4A6FA5] !text-white"
-                            : "chunky-button bg-white text-[var(--neutral-700)]"
-                        }`}
-                      >
-                        {style}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Fur Accent colors */}
-                <div className="space-y-1.5">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Fur Accent</span>
-                    <span className="text-[9px] text-[var(--neutral-400)] leading-none mt-0.5 font-bold">Applied to cheeks, ears & tail tip</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2.5">
-                    {(["cream", "tan", "rust", "sage", "dusk", "midnight"] as const).map((color) => {
-                      const colorHexMap = {
-                        cream: "bg-[#fcf6eb]",
-                        tan: "bg-[#d7b594]",
-                        rust: "bg-[#ac3232]",
-                        sage: "bg-[#76a5af]",
-                        dusk: "bg-[#3d5e72]",
-                        midnight: "bg-[#111118]",
-                      };
-                      return (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => setFurColor(color)}
-                          className={`h-8 w-8 rounded-full border-2 transition-all cursor-pointer relative ${colorHexMap[color]} ${
-                            furColor === color ? "border-black scale-110 shadow-sm" : "border-black/10"
-                          }`}
-                          title={color}
-                        >
-                          {furColor === color && (
-                            <span className="absolute inset-0 flex items-center justify-center text-[10px] text-white mix-blend-difference font-bold">✓</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Keepsake */}
-                <label className="grid gap-1.5">
-                  <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-wider text-[var(--neutral-500)]">Starting Keepsake</span>
-                    <span className="text-[9px] text-[var(--neutral-400)] leading-none mt-0.5 font-bold">Describe a cosmetic item (scarf, ribbon, pin...)</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={keepsake}
-                    onChange={(e) => setKeepsake(e.target.value)}
-                    className="rounded-xl border-2 border-black/10 bg-white/70 px-3.5 py-2.5 outline-none focus:border-[#4A6FA5] transition-all text-xs text-[var(--neutral-900)] font-medium shadow-inner"
-                    placeholder="e.g. a red knitted scarf..."
-                    maxLength={30}
-                  />
-                </label>
-
-                {error && <p className="text-xs text-red-500 font-semibold">{error}</p>}
-
-                {/* CTAs */}
-                <div className="pt-2 space-y-2">
-                  <button
-                    type="submit"
-                    className="w-full chunky-button !bg-[#4A6FA5] !text-white py-3.5 font-bold transition-all text-xs cursor-pointer"
-                  >
-                    Confirm & Start Exploring →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSkipCustomization}
-                    className="w-full text-center text-xs font-bold text-[var(--neutral-400)] hover:text-black cursor-pointer py-1"
-                  >
-                    Skip customization for now
-                  </button>
-                </div>
-              </form>
+              {/* Main Cabbit Vector Preview */}
+              <div className="relative z-10 transform scale-110">
+                <CabbitVectorPreview earStyle={earStyle} eyeStyle={eyeStyle} furColor={furColor} keepsakeText={keepsake} />
+              </div>
             </div>
+
+            {/* Customizer Panel */}
+            <form onSubmit={handleConfirmCustomization} className="bg-[#FFF9ED] space-y-4">
+              
+              {/* Tabs selector */}
+              <div className="bg-[#FFF1D6] border-2 border-black/5 rounded-[20px] p-1 flex justify-between gap-1 shadow-inner">
+                {(["ears", "face", "outfit"] as const).map((tab) => {
+                  const active = customizerTab === tab;
+                  const tabLabels = {
+                    ears: "🐰 Ears",
+                    face: "🐼 Face",
+                    outfit: "👕 Outfit",
+                  };
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setCustomizerTab(tab)}
+                      className={`flex-1 py-2.5 text-xs font-black rounded-[16px] cursor-pointer transition-all ${
+                        active
+                          ? "bg-[#9CC9E7] text-[#356B9A] shadow-sm"
+                          : "text-[#754728] hover:bg-white/50"
+                      }`}
+                    >
+                      {tabLabels[tab]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sub-grid based on active tab selection */}
+              <div className="grid grid-cols-3 gap-3">
+                {customizerTab === "ears" && (
+                  <>
+                    {/* Floppy Ears Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEarStyle("floppy")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        earStyle === "floppy"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle="floppy" eyeStyle={eyeStyle} furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Floppy</span>
+                    </button>
+
+                    {/* Round Ears Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEarStyle("round")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        earStyle === "round"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle="round" eyeStyle={eyeStyle} furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Round</span>
+                    </button>
+
+                    {/* Perky Ears Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEarStyle("pointy")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        earStyle === "pointy"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle="pointy" eyeStyle={eyeStyle} furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Perky</span>
+                    </button>
+                  </>
+                )}
+
+                {customizerTab === "face" && (
+                  <>
+                    {/* Wide Eyes Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEyeStyle("wide")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        eyeStyle === "wide"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle={earStyle} eyeStyle="wide" furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Wide</span>
+                    </button>
+
+                    {/* Sleepy Eyes Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEyeStyle("sleepy")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        eyeStyle === "sleepy"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle={earStyle} eyeStyle="sleepy" furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Sleepy</span>
+                    </button>
+
+                    {/* Sparkle Eyes Card */}
+                    <button
+                      type="button"
+                      onClick={() => setEyeStyle("sparkle")}
+                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        eyeStyle === "sparkle"
+                          ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                          : "border-black/5 bg-white hover:border-black/10"
+                      }`}
+                    >
+                      <div className="h-12 flex items-center justify-center scale-75">
+                        <CabbitVectorPreview earStyle={earStyle} eyeStyle="sparkle" furColor={furColor} />
+                      </div>
+                      <span className="text-[10px] font-black text-[#442515] mt-1">Sparkle</span>
+                    </button>
+                  </>
+                )}
+
+                {customizerTab === "outfit" && (
+                  <div className="col-span-3 text-center py-6 bg-white rounded-2xl border-2 border-black/5">
+                    <span className="text-2xl">👕</span>
+                    <p className="text-[10px] font-black text-[#754728] mt-2">Outfit Customization unlocks in exploration</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Accent Color picker */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#754728] block text-center">A little color</span>
+                <div className="flex justify-center gap-3">
+                  {(["cream", "tan", "rust", "sage", "dusk"] as const).map((color) => {
+                    const colorHexMap = {
+                      cream: "bg-[#FFF9ED]",
+                      tan: "bg-[#d7b594]",
+                      rust: "bg-[#ac3232]",
+                      sage: "bg-[#76a5af]",
+                      dusk: "bg-[#3d5e72]",
+                    };
+                    const active = furColor === color;
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setFurColor(color)}
+                        className={`h-8 w-8 rounded-full border-2 transition-all cursor-pointer relative ${colorHexMap[color]} ${
+                          active ? "border-[#356B9A] scale-110 shadow-sm ring-2 ring-[#9CC9E7]" : "border-black/15"
+                        }`}
+                        title={color}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* First keepsake selector */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#754728] block text-center">First keepsake</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "blue scarf", label: "Blue Scarf", icon: "🧣" },
+                    { id: "blue bow", label: "Blue Bow", icon: "🎀" },
+                    { id: "backpack", label: "Backpack", icon: "🎒" }
+                  ].map((item) => {
+                    const active = keepsake === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setKeepsake(item.id)}
+                        className={`py-2 px-1 flex flex-col items-center justify-center rounded-xl border-2 cursor-pointer transition-all ${
+                          active
+                            ? "border-[#356B9A] bg-[#9CC9E7]/25 shadow-sm"
+                            : "border-black/5 bg-white hover:border-black/10"
+                        }`}
+                      >
+                        <span className="text-xl">{item.icon}</span>
+                        <span className="text-[9px] font-bold text-[#442515] mt-1 truncate max-w-full">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {error && <p className="text-xs text-red-500 font-semibold text-center">{error}</p>}
+
+              {/* Name your Cabbit */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#754728] block text-center">Name your Cabbit</span>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (e.target.value.trim()) setError("");
+                  }}
+                  className="w-full text-center py-2.5 px-3 rounded-xl border-2 border-black/10 bg-white text-xs font-black text-[#442515] outline-none focus:border-[#356B9A] shadow-inner"
+                  placeholder="e.g. Pip, Mochi..."
+                  maxLength={15}
+                />
+              </div>
+
+              {error && <p className="text-xs text-red-500 font-semibold text-center">{error}</p>}
+
+              {/* Action Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-4 rounded-full bg-[#EFA43B] hover:bg-[#FF9B3D] text-white font-black text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border-2 border-black/10 active:scale-97"
+                >
+                  <span>Meet my Cabbit</span>
+                  <span>🧡</span>
+                </button>
+              </div>
+
+            </form>
           </section>
         )}
 
